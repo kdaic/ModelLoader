@@ -1,3 +1,9 @@
+# emacs backup
+.*~
+
+# backup file
+*.bak
+
 # Prerequisites
 *.d
 
