@@ -23,6 +23,7 @@
 #include <hrpCollision/ColdetModel.h>
 #include <stack>
 
+
 using namespace std;
 using namespace hrp;
 
@@ -54,7 +55,7 @@ static bool g_checkInlineFileUpdateTime(BodyInfo* bodyInfo)
 {
   BodyInfo* pBodyInfo = bodyInfo;
   if( !!pBodyInfo ) {
-    return pBodyInfo_impl->checkInlineFileUpdateTime();
+    return pBodyInfo->checkInlineFileUpdateTime();
   }
   throw ModelLoaderException("checkInlineFileUpdateTime invalid pointer");
 }
@@ -84,7 +85,7 @@ static void g_changetoBoundingBox(BodyInfo* bodyInfo, unsigned int* depth)
 
 
 BodyInfo_ptr ModelLoader::getBodyInfoEx(const char* url0, const ModelLoadOption& option)
-    throw (SystemException, ModelLoaderException)
+    throw (ModelLoaderException)
 {
   string url(url0);
 
@@ -102,11 +103,11 @@ BodyInfo_ptr ModelLoader::getBodyInfoEx(const char* url0, const ModelLoadOption&
   if( p != urlToBodyInfoMap_.end()
       && mtime == g_getLastUpdateTime(p->second)
       && g_checkInlineFileUpdateTime(p->second) ) {
-    bodyInfo = p->second->_this();
+    bodyInfo = p->second;
     cout << string("cache found for ") + url << endl;
-    if(option.AABBdata.length()){
+    if(option.AABBdata.size()){
       g_setParam(p->second,"AABBType", (int)option.AABBtype);
-      int length=option.AABBdata.length();
+      int length=option.AABBdata.size();
       unsigned int* _AABBdata = new unsigned int[length];
       for(int i=0; i<length; i++)
         _AABBdata[i] = option.AABBdata[i];
@@ -120,23 +121,22 @@ BodyInfo_ptr ModelLoader::getBodyInfoEx(const char* url0, const ModelLoadOption&
 
 
 BodyInfo_ptr ModelLoader::getBodyInfo(const char* url)
-    throw (SystemException, ModelLoaderException)
+  throw (ModelLoaderException)
 {
   ModelLoadOption option;
   option.readImage = false;
-  option.AABBdata.length(0);
-  option.AABBtype = OpenHRP::ModelLoader::AABB_NUM;
+  option.AABBdata.resize(0);
+  option.AABBtype = AABB_NUM;
   return getBodyInfoEx(url, option);
 }
 
 
 BodyInfo_ptr ModelLoader::loadBodyInfo(const char* url)
+  throw (ModelLoaderException)
 {
   BodyInfo_ptr bodyInfo;
   try {
     bodyInfo = getBodyInfo(url);
-  } catch(SystemException& ex) {
-    std::cerr << "SystemException raised by ModelLoader: " << ex._rep_id() << std::endl;
   } catch(ModelLoaderException& ex){
     std::cerr << "ModelLoaderException : " << ex.description << std::endl;
   }
@@ -144,20 +144,20 @@ BodyInfo_ptr ModelLoader::loadBodyInfo(const char* url)
 }
 
 
-BodyInfo_ptr ModelLoader::loadBodyInfoEx(const char* url, const OpenHRP::ModelLoader::ModelLoadOption& option)
-    throw (SystemException, ModelLoaderException)
+BodyInfo_ptr ModelLoader::loadBodyInfoEx(const char* url, const ModelLoadOption& option)
+    throw (ModelLoaderException)
 {
     BodyInfo_ptr bodyInfo = loadBodyInfoFromModelFile(std::string(url), option);
-    if(option.AABBdata.length()){
+    if(option.AABBdata.size()){
         g_setParam(bodyInfo,"AABBType", (int)option.AABBtype);
-        int length=option.AABBdata.length();
+        int length=option.AABBdata.size();
         unsigned int* _AABBdata = new unsigned int[length];
         for(int i=0; i<length; i++)
             _AABBdata[i] = option.AABBdata[i];
-        g_hangetoBoundingBox(bodyInfo,_AABBdata);
+        g_changetoBoundingBox(bodyInfo,_AABBdata);
         delete[] _AABBdata;
     }
-    return bodyInfo->this();
+    return bodyInfo;
 }
 
 
@@ -197,13 +197,13 @@ BodyInfo_ptr ModelLoader::loadBodyInfoFromModelFile(const string url, const Mode
 
 
 SceneInfo_ptr ModelLoader::loadSceneInfo(const char* url)
-  throw (SystemException, ModelLoaderException)
+  throw (ModelLoaderException)
 {
   cout << "loading " << url << endl;
 
-  SceneInfo_impl* sceneInfo;
+  SceneInfo* sceneInfo;
   try {
-    SceneInfo_impl* p = new SceneInfo();
+    SceneInfo* p = new SceneInfo();
     p->load(url);
     sceneInfo = p;
   }
@@ -214,15 +214,15 @@ SceneInfo_ptr ModelLoader::loadSceneInfo(const char* url)
   }
   cout << url << " was successfully loaded ! " << endl;
 
-  return sceneInfo->_this();
+  return sceneInfo;
 }
 
 
-void ModelLoader_impl::clearData()
+void ModelLoader::clearData()
 {
     //UrlToBodyInfoMap::iterator p;
     //for(p = urlToBodyInfoMap.begin(); p != urlToBodyInfoMap.end(); ++p){
-    //	BodyInfo_impl* bodyInfo = p->second;
+    //	BodyInfo* bodyInfo = p->second;
     //	PortableServer::ObjectId_var objectId = poa->servant_to_id(bodyInfo);
     //	poa->deactivate_object(objectId);
     //	bodyInfo->_remove_ref();
@@ -233,20 +233,3 @@ void ModelLoader_impl::clearData()
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-
-
-bool hrp::loadBodyFromModelLoader(BodyPtr body, const char* url, bool loadGeometryForCollisionDetection)
-{
-  ModelLoader ml();
-  BodyInfo_ptr bodyInfo = ml.loadBodyInfo(url);
-
-  if(!CORBA::is_nil(bodyInfo)){
-    ModelLoaderHelper helper;
-    if(loadGeometryForCollisionDetection){
-      helper.enableCollisionDetectionModelLoading(true);
-    }
-    return helper.createBody(body, bodyInfo);
-  }
-
-  return false;
-}

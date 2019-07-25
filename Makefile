@@ -86,8 +86,9 @@ LINK_DIRS += $(LOCAL_LINK_DIRS)
 #
 # link (pay attension to linking-order)
 LINK_GTEST = -lgtest_main -lgtest
+LINK_JPEG = -ljpeg
 LINK  = $(LINK_DIRS)
-LINK += -lm $(LINK_GTEST)
+LINK += -lm $(LINK_GTEST) $(LINK_JPEG)
 #
 # OS dependency
 ifeq ($(OS),Linux)
@@ -111,7 +112,8 @@ SLIB_APP = $(LIB_DIR)/lib$(APP_NAME).a
 EXE_APP  = $(BIN_DIR)/$(APP_NAME)
 TEST_APP = $(BIN_DIR)/unit_test
 #
-ALL_SRC = $(wildcard $(addsuffix /*.cpp, $(SRC_DIR)))
+ALL_SRC =  $(wildcard $(addsuffix /*.cpp, $(SRC_DIR)))
+ALL_SRC += $(wildcard $(addsuffix /*.cpp, $(SRC_APP_DIR)))
 EXE_SRC :=$(SRC_DIR)/main.cpp
 LIB_SRC = $(filter-out $(EXE_SRC), $(ALL_SRC))
 LIB_SRC += $(wildcard $(addsuffix /*.cpp, $(SRC_HRP_DIR)))

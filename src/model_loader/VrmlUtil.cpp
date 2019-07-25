@@ -8,15 +8,14 @@
 using namespace std;
 
 namespace {
-    void throwException(const std::string& fieldName, const std::string& expectedFieldType)
-    {
-        string error;
-        error += "The node must have a field \"" + fieldName + "\" of " + expectedFieldType + " type";
-        throw ModelLoaderException(error.c_str());
-    }
+void throwException(const std::string& fieldName, const std::string& expectedFieldType)
+{
+  string error;
+  error += "The node must have a field \"" + fieldName + "\" of " + expectedFieldType + " type";
+  throw ModelLoaderException(error.c_str());
 }
 
-
+}
 
 
 void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, std::string& out_s)
@@ -41,7 +40,7 @@ void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, std::string& o
 }
 
 
-void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, DblSequence& out_v)
+void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, std::vector<double>& out_v)
 {
     VrmlVariantField& f = fmap[name];
     switch(f.typeId()){
@@ -49,7 +48,7 @@ void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, DblSequence& o
     {
         MFFloat& mf = f.mfFloat();
         std::size_t n = mf.size();
-        out_v.length(n);
+        out_v.resize(n);
         for(std::size_t i=0; i < n; ++i){
             out_v[i] = mf[i];
         }
@@ -61,7 +60,7 @@ void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, DblSequence& o
 }
 
 
-void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, DblArray3& out_v)
+void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, boost::array<double,3>& out_v)
 {
     VrmlVariantField& f = fmap[name];
     switch(f.typeId()){
@@ -79,7 +78,7 @@ void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, DblArray3& out
     }
 }
 
-void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, DblArray9& out_m)
+void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, boost::array<double,9>& out_m)
 {
     VrmlVariantField& f = fmap[name];
     switch(f.typeId()){
@@ -100,12 +99,12 @@ void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, DblArray9& out
     }
 }
 
-void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, double& out_v)
+void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, double* out_v)
 {
     VrmlVariantField& f = fmap[name];
     switch(f.typeId()){
     case SFFLOAT:
-        out_v = f.sfFloat();
+        *out_v = f.sfFloat();
         break;
     default:
         throwException(name, "SFFloat");
@@ -113,12 +112,12 @@ void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, double& out_v)
 }
 
 
-void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, long& out_v)
+void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, long* out_v)
 {
     VrmlVariantField& f = fmap[name];
     switch(f.typeId()){
     case SFINT32:
-        out_v = f.sfInt32();
+        *out_v = f.sfInt32();
         break;
     default:
         throwException(name, "SFInt32");

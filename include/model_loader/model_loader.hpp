@@ -16,15 +16,18 @@
 #define MODEL_LOADER_HPP_INCLUDE
 
 #include "body_info.hpp"
+#include <sys/stat.h>
 
+using namespace hrp;
 
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 class SceneInfo : public virtual ShapeSetInfo
 {
 public:
 
-  SceneInfo_impl(PortableServer::POA_ptr poa);
-  virtual ~SceneInfo_impl();
+  SceneInfo();
+  virtual ~SceneInfo();
 
   virtual char* url();
   virtual TransformedShapeIndexSequence* shapeIndices();
@@ -41,10 +44,13 @@ private:
   std::string url_;
   /// LinkInfo の shapeIndices と同じ。
   TransformedShapeIndexSequence shapeIndices_;
-  DblArray12Sequence inlinedShapeTransformMatrices_;
+  std::vector<boost::array<double,12> > inlinedShapeTransformMatrices_;
 
 };
 
+typedef SceneInfo* SceneInfo_ptr;
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 /// @brief ModelLoaderインタフェース定義
 /// テキスト記述されたモデル情報のファイルを読み込み、
@@ -58,13 +64,6 @@ public:
   typedef std::map<std::string, BodyInfo*> UrlToBodyInfoMap;
   UrlToBodyInfoMap urlToBodyInfoMap_;
 
-  /// モデルローダの処理においてエラーが生じたときに生成される例外。
-  class ModelLoaderException : std::exception
-  {
-    /// エラーの説明
-    std::string  description;
-  };
-
   /// BodyInfoオブジェクトを得る。
   /// @details
   /// 本メソッドでは、指定されたファイルが以前に読み込まれていれば、
@@ -74,26 +73,26 @@ public:
   /// load()メソッドと同じ処理となる。
   /// @param[in] url モデルファイルのURL
   BodyInfo_ptr getBodyInfo(const char* url)
-    throw(SystemException, ModelLoaderException);
+    throw(ModelLoaderException);
 
   /// オプション付きで、getBodyInfoを実行
   /// @param[in] url モデルファイルのURL
   /// @param[in] option
   BodyInfo_ptr getBodyInfoEx(const char* url, const ModelLoadOption& option )
-    throw(SystemException, ModelLoaderException);
+    throw(ModelLoaderException);
 
 
   /// モデルファイルをロードし、BodyInfoオブジェクトを得る。
   /// @param[in] url モデルファイルのURL
   BodyInfo_ptr loadBodyInfo(const char* url)
-    throw(SystemException, ModelLoaderException);
+    throw(ModelLoaderException);
 
   BodyInfo_ptr loadBodyInfoEx(const char* url, const ModelLoadOption& option)
-    throw(SystemException, ModelLoaderException);
+    throw(ModelLoaderException);
 
   /// 素のVRMLファイルを読み込み、含まれる形状のデータ一式を SceneInfo として返す。
   SceneInfo_ptr loadSceneInfo(const char* url)
-    throw (SystemException, ModelLoaderException);
+    throw(ModelLoaderException);
 
   /// 以前に読み込んだファイルの内容（getBody()で利用される）を消去する。
   void clearData();

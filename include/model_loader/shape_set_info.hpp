@@ -34,17 +34,17 @@ public:
   ShapeSetInfo();
   virtual ~ShapeSetInfo();
 
-  virtual ShapeInfoSequence* shapes();
-  virtual AppearanceInfoSequence* appearances();
-  virtual MaterialInfoSequence* materials();
-  virtual TextureInfoSequence* textures();
+  ShapeInfoSequence shapes();
+  AppearanceInfoSequence appearances();
+  MaterialInfoSequence materials();
+  TextureInfoSequence textures();
 
 protected:
 
   void applyTriangleMeshShaper(VrmlNodePtr node);
   static void putMessage(const std::string& message);
   std::string& replace(std::string& str, const std::string& sb, const std::string& sa);
-  void traverseShapeNodes(VrmlNode* node, const Matrix44& T, TransformedShapeIndexSequence& io_shapeIndices, DblArray12Sequence& inlinedShapeM, const SFString* url = NULL);
+  void traverseShapeNodes(VrmlNode* node, const Matrix44& T, TransformedShapeIndexSequence& io_shapeIndices, std::vector<boost::array<double,12> >& inlinedShapeM, const SFString* url = NULL);
   virtual const std::string& topUrl() = 0;
   void setColdetModel(ColdetModelPtr& coldetModel, TransformedShapeIndexSequence shapeIndices, const Matrix44& Tparent, int& vertexIndex, int& triangleIndex);
   void saveOriginalData();

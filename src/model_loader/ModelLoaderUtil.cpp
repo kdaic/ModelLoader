@@ -12,7 +12,7 @@
    @author Ergovision
 */
 
-#include "ModelLoaderUtil.h"
+#include "ModelLoaderUtil.hpp"
 #include "Link.h"
 #include "Sensor.h"
 #include "Light.h"
@@ -23,102 +23,100 @@
 
 using namespace std;
 using namespace hrp;
-using namespace OpenHRP;
-
 
 namespace {
 
 const bool debugMode = false;
 
-ostream& operator<<(ostream& os, std::vector<double>& data)
-{
-  int size = data->length();
-  for(int i=0; i < size-1; ++i){
-    cout << data[i] << ", ";
-  }
-  cout << data[size-1];
+// ostream& operator<<(ostream& os, std::vector<double>& data)
+// {
+//   int size = data.size();
+//   for(int i=0; i < size-1; ++i){
+//     cout << data[i] << ", ";
+//   }
+//   cout << data[size-1];
 
-  return os;
-}
-
-
-ostream& operator<<(ostream& os, double data[3])
-{
-  cout << data[0] << ", " << data[1] << ", " << data[2];
-  return os;
-}
+//   return os;
+// }
 
 
-ostream& operator<<(ostream& os, double data[9])
-{
-  for(unsigned int i=0; i < 8; ++i){
-    cout << data[i] << ", ";
-  }
-  cout << data[9];
-  return os;
-}
+// ostream& operator<<(ostream& os, double data[3])
+// {
+//   cout << data[0] << ", " << data[1] << ", " << data[2];
+//   return os;
+// }
 
 
-void dumpBodyInfo(BodyInfo_ptr bodyInfo)
-{
-  cout << "<<< BodyInfo >>>\n";
+// ostream& operator<<(ostream& os, double data[9])
+// {
+//   for(unsigned int i=0; i < 8; ++i){
+//     cout << data[i] << ", ";
+//   }
+//   cout << data[9];
+//   return os;
+// }
 
-  std::string charaName = bodyInfo->name();
 
-  cout << "name: " << charaName << "\n";
+// void dumpBodyInfo(BodyInfo_ptr bodyInfo)
+// {
+//   cout << "<<< BodyInfo >>>\n";
 
-  std::vector<LinkInfo> linkInfoSeq = bodyInfo->links();
+//   std::string charaName = bodyInfo->name();
 
-  int numLinks = linkInfoSeq->length();
-  cout << "num links: " << numLinks << "\n";
+//   cout << "name: " << charaName << "\n";
 
-  for(int i=0; i < numLinks; ++i){
+//   std::vector<LinkInfo> linkInfoSeq = bodyInfo->links();
 
-    const LinkInfo& linkInfo = linkInfoSeq[i];
-    std::string linkName = linkInfo.name;
+//   int numLinks = linkInfoSeq->length();
+//   cout << "num links: " << numLinks << "\n";
 
-    cout << "<<< LinkInfo: " << linkName << " (index " << i << ") >>>\n";
-    cout << "parentIndex: " << linkInfo.parentIndex << "\n";
+//   for(int i=0; i < numLinks; ++i){
 
-    const std::vector<short>& childIndices = linkInfo.childIndices;
-    if(childIndices.length() > 0){
-      cout << "childIndices: ";
-      for(unsigned int i=0; i < childIndices.length(); ++i){
-        cout << childIndices[i] << " ";
-      }
-      cout << "\n";
-    }
+//     const LinkInfo& linkInfo = linkInfoSeq[i];
+//     std::string linkName = linkInfo.name;
 
-    const std::vector<SensorInfo>& sensorInfoSeq = linkInfo.sensors;
+//     cout << "<<< LinkInfo: " << linkName << " (index " << i << ") >>>\n";
+//     cout << "parentIndex: " << linkInfo.parentIndex << "\n";
 
-    int numSensors = sensorInfoSeq.length();
-    cout << "num sensors: " << numSensors << "\n";
+//     const std::vector<short>& childIndices = linkInfo.childIndices;
+//     if(childIndices.length() > 0){
+//       cout << "childIndices: ";
+//       for(unsigned int i=0; i < childIndices.length(); ++i){
+//         cout << childIndices[i] << " ";
+//       }
+//       cout << "\n";
+//     }
 
-    for(int j=0; j < numSensors; ++j){
-      cout << "<<< SensorInfo >>>\n";
-      const SensorInfo& sensorInfo = sensorInfoSeq[j];
-      cout << "id: " << sensorInfo.id << "\n";
-      cout << "type: " << sensorInfo.type << "\n";
+//     const std::vector<SensorInfo>& sensorInfoSeq = linkInfo.sensors;
 
-      std::string sensorName = sensorInfo.name;
-      cout << "name: \"" << sensorName << "\"\n";
+//     int numSensors = sensorInfoSeq.length();
+//     cout << "num sensors: " << numSensors << "\n";
 
-      const double* p = sensorInfo.translation;
-      cout << "translation: " << p[0] << ", " << p[1] << ", " << p[2] << "\n";
+//     for(int j=0; j < numSensors; ++j){
+//       cout << "<<< SensorInfo >>>\n";
+//       const SensorInfo& sensorInfo = sensorInfoSeq[j];
+//       cout << "id: " << sensorInfo.id << "\n";
+//       cout << "type: " << sensorInfo.type << "\n";
 
-      const double* r = sensorInfo.rotation;
-      cout << "rotation: " << r[0] << ", " << r[1] << ", " << r[2] << ", " << r[3] << "\n";
+//       std::string sensorName = sensorInfo.name;
+//       cout << "name: \"" << sensorName << "\"\n";
 
-    }
-  }
+//       const double* p = sensorInfo.translation;
+//       cout << "translation: " << p[0] << ", " << p[1] << ", " << p[2] << "\n";
 
-  cout.flush();
-}
+//       const double* r = sensorInfo.rotation;
+//       cout << "rotation: " << r[0] << ", " << r[1] << ", " << r[2] << ", " << r[3] << "\n";
+
+//     }
+//   }
+
+//   cout.flush();
+// }
 
 
 inline double getLimitValue(std::vector<double> limitseq, double defaultValue)
 {
-  return (limitseq.length() == 0) ? defaultValue : limitseq[0];
+  return (limitseq.size() == 0) ? defaultValue : limitseq[0];
 }
 
 
@@ -129,11 +127,11 @@ bool ModelLoaderHelper::createBody(BodyPtr& body, BodyInfo_ptr bodyInfo)
 {
   this->body_ = body;
 
-  const char* name = bodyInfo->name();
+  std::string name = bodyInfo->name();
   body_->setModelName(name);
   body_->setName(name);
 
-  int n = bodyInfo->links()->length();
+  int n = bodyInfo->links().size();
   linkInfoSeq_ = bodyInfo->links();
   shapeInfoSeq_ = bodyInfo->shapes();
   extraJointInfoSeq_ = bodyInfo->extraJoints();
@@ -178,7 +176,7 @@ Link* ModelLoaderHelper::createLink(int index, const Matrix33& parentRs)
 
   Link* link = (*createLinkFunc_)();
 
-  CORBA::String_var name0 = linkInfo.name;
+  std::string name0 = linkInfo.name;
   link->name = string( name0 );
   link->jointId = jointId;
 
@@ -211,7 +209,7 @@ Link* ModelLoaderHelper::createLink(int index, const Matrix33& parentRs)
   if(jointId < 0){
     if(link->jointType == Link::ROTATIONAL_JOINT || link->jointType == Link::SLIDE_JOINT){
       std::cerr << "Warning:  Joint ID is not given to joint " << link->name
-                << " of model " << body->modelName() << "." << std::endl;
+                << " of model " << body_->modelName() << "." << std::endl;
     }
   }
 
@@ -260,7 +258,7 @@ Link* ModelLoaderHelper::createLink(int index, const Matrix33& parentRs)
   std::stack<Link*> children;
 
   //##### [Changed] Link Structure (convert NaryTree to BinaryTree).
-  int childNum = linkInfo.childIndices.length();
+  int childNum = linkInfo.childIndices.size();
   for(int i = 0 ; i < childNum ; i++) {
     int childIndex = linkInfo.childIndices[i];
     Link* childLink = createLink(childIndex, Rs);
@@ -286,7 +284,7 @@ Link* ModelLoaderHelper::createLink(int index, const Matrix33& parentRs)
 
 void ModelLoaderHelper::createLights(Link* link, const LightInfoSequence& lightInfoSeq, const Matrix33& Rs)
 {
-  int numLights = lightInfoSeq.length();
+  int numLights = lightInfoSeq.size();
 
   for(int i=0 ; i < numLights ; ++i ) {
     const LightInfo& lightInfo = lightInfoSeq[i];
@@ -332,7 +330,7 @@ void ModelLoaderHelper::createLights(Link* link, const LightInfoSequence& lightI
 
 void ModelLoaderHelper::createSensors(Link* link, const SensorInfoSequence& sensorInfoSeq, const Matrix33& Rs)
 {
-  int numSensors = sensorInfoSeq.length();
+  int numSensors = sensorInfoSeq.size();
 
   for(int i=0 ; i < numSensors ; ++i ) {
     const SensorInfo& sensorInfo = sensorInfoSeq[i];
@@ -359,7 +357,7 @@ void ModelLoaderHelper::createSensors(Link* link, const SensorInfoSequence& sens
       Sensor* sensor = body_->createSensor(link, sensorType, id, name);
 
       if(sensor) {
-        const double[3]& p = sensorInfo.translation;
+        const boost::array<double,3> p = sensorInfo.translation;
         sensor->localPos = Rs * Vector3(p[0], p[1], p[2]);
 
         const Vector3 axis(sensorInfo.rotation[0], sensorInfo.rotation[1], sensorInfo.rotation[2]);
@@ -417,30 +415,30 @@ void ModelLoaderHelper::createColdetModel(Link* link, const LinkInfo& linkInfo)
   int totalNumVertices = 0;
   int totalNumTriangles = 0;
   const TransformedShapeIndexSequence& shapeIndices = linkInfo.shapeIndices;
-  unsigned int nshape = shapeIndices.length();
+  unsigned int nshape = shapeIndices.size();
   short shapeIndex;
   double R[9], p[3];
-  for(unsigned int i=0; i < shapeIndices.length(); i++){
+  for(unsigned int i=0; i < shapeIndices.size(); i++){
     shapeIndex = shapeIndices[i].shapeIndex;
-    const DblArray12 &tform = shapeIndices[i].transformMatrix;
+    const boost::array<double,12> tform = shapeIndices[i].transformMatrix;
     R[0] = tform[0]; R[1] = tform[1]; R[2] = tform[2]; p[0] = tform[3];
     R[3] = tform[4]; R[4] = tform[5]; R[5] = tform[6]; p[1] = tform[7];
     R[6] = tform[8]; R[7] = tform[9]; R[8] = tform[10]; p[2] = tform[11];
     const ShapeInfo& shapeInfo = shapeInfoSeq_[shapeIndex];
-    totalNumVertices += shapeInfo.vertices.length() / 3;
-    totalNumTriangles += shapeInfo.triangles.length() / 3;
+    totalNumVertices += shapeInfo.vertices.size() / 3;
+    totalNumTriangles += shapeInfo.triangles.size() / 3;
   }
 
   const SensorInfoSequence& sensors = linkInfo.sensors;
-  for (unsigned int i=0; i<sensors.length(); i++){
+  for (unsigned int i=0; i<sensors.size(); i++){
     const SensorInfo &sinfo = sensors[i];
     const TransformedShapeIndexSequence tsis = sinfo.shapeIndices;
-    nshape += tsis.length();
-    for (unsigned int j=0; j<tsis.length(); j++){
+    nshape += tsis.size();
+    for (unsigned int j=0; j<tsis.size(); j++){
       short shapeIndex = tsis[j].shapeIndex;
       const ShapeInfo& shapeInfo = shapeInfoSeq_[shapeIndex];
-      totalNumTriangles += shapeInfo.triangles.length() / 3;
-      totalNumVertices += shapeInfo.vertices.length() / 3 ;
+      totalNumTriangles += shapeInfo.triangles.size() / 3;
+      totalNumVertices += shapeInfo.vertices.size() / 3 ;
     }
   }
 
@@ -462,7 +460,7 @@ void ModelLoaderHelper::addLinkVerticesAndTriangles
 (ColdetModelPtr& coldetModel, const TransformedShapeIndex& tsi, const Matrix44& Tparent, std::vector<ShapeInfo>& shapes, int& vertexIndex, int& triangleIndex)
 {
   short shapeIndex = tsi.shapeIndex;
-  const double* M = tsi.transformMatrix;;
+  const boost::array<double,12> M = tsi.transformMatrix;;
   Matrix44 T, Tlocal;
   Tlocal << M[0], M[1], M[2],  M[3],
     M[4], M[5], M[6],  M[7],
@@ -473,14 +471,14 @@ void ModelLoaderHelper::addLinkVerticesAndTriangles
   const ShapeInfo& shapeInfo = shapes[shapeIndex];
   int vertexIndexBase = vertexIndex;
   const std::vector<float>& vertices = shapeInfo.vertices;
-  const int numVertices = vertices.length() / 3;
+  const int numVertices = vertices.size() / 3;
   for(int j=0; j < numVertices; ++j){
     Vector4 v(T * Vector4(vertices[j*3], vertices[j*3+1], vertices[j*3+2], 1.0));
     coldetModel->setVertex(vertexIndex++, v[0], v[1], v[2]);
   }
 
   const std::vector<long>& triangles = shapeInfo.triangles;
-  const int numTriangles = triangles.length() / 3;
+  const int numTriangles = triangles.size() / 3;
   for(int j=0; j < numTriangles; ++j){
     int t0 = triangles[j*3] + vertexIndexBase;
     int t1 = triangles[j*3+1] + vertexIndexBase;
@@ -498,14 +496,14 @@ void ModelLoaderHelper::addLinkVerticesAndTriangles(ColdetModelPtr& coldetModel,
   const TransformedShapeIndexSequence& shapeIndices = linkInfo.shapeIndices;
 
   Matrix44 E(Matrix44::Identity());
-  for(unsigned int i=0; i < shapeIndices.length(); i++){
+  for(unsigned int i=0; i < shapeIndices.size(); i++){
     addLinkVerticesAndTriangles(coldetModel, shapeIndices[i], E, shapeInfoSeq_,
                                 vertexIndex, triangleIndex);
   }
 
   Matrix44 T(Matrix44::Identity());
   const std::vector<SensorInfo>& sensors = linkInfo.sensors;
-  for (unsigned int i=0; i<sensors.length(); i++){
+  for (unsigned int i=0; i<sensors.size(); i++){
     const SensorInfo& sensor = sensors[i];
     calcRodrigues(T, Vector3(sensor.rotation[0], sensor.rotation[1],
                              sensor.rotation[2]), sensor.rotation[3]);
@@ -513,7 +511,7 @@ void ModelLoaderHelper::addLinkVerticesAndTriangles(ColdetModelPtr& coldetModel,
     T(1,3) = sensor.translation[1];
     T(2,3) = sensor.translation[2];
     const TransformedShapeIndexSequence& shapeIndices = sensor.shapeIndices;
-    for (unsigned int j=0; j<shapeIndices.length(); j++){
+    for (unsigned int j=0; j<shapeIndices.size(); j++){
       addLinkVerticesAndTriangles(coldetModel, shapeIndices[j], T,
                                   shapeInfoSeq_,
                                   vertexIndex, triangleIndex);
@@ -544,8 +542,8 @@ void ModelLoaderHelper::addLinkPrimitiveInfo(ColdetModelPtr& coldetModel,
   default:
     break;
   }
-  coldetModel->setNumPrimitiveParams(shapeInfo.primitiveParameters.length());
-  for (unsigned int i=0; i<shapeInfo.primitiveParameters.length(); i++){
+  coldetModel->setNumPrimitiveParams(shapeInfo.primitiveParameters.size());
+  for (unsigned int i=0; i<shapeInfo.primitiveParameters.size(); i++){
     coldetModel->setPrimitiveParam(i, shapeInfo.primitiveParameters[i]);
   }
   coldetModel->setPrimitivePosition(R, p);
@@ -554,7 +552,7 @@ void ModelLoaderHelper::addLinkPrimitiveInfo(ColdetModelPtr& coldetModel,
 void ModelLoaderHelper::setExtraJoints()
 {
   body_->extraJoints.clear();
-  int n = extraJointInfoSeq_->length();
+  int n = extraJointInfoSeq_.size();
 
   for(int i=0; i < n; ++i){
 		const ExtraJointInfo& extraJointInfo = extraJointInfoSeq_[i];
@@ -563,12 +561,12 @@ void ModelLoaderHelper::setExtraJoints()
 		joint.link[0] = body_->link(string(extraJointInfo.link[0]));
     joint.link[1] = body_->link(string(extraJointInfo.link[1]));
 
-		ExtraJointType jointType = extraJointInfo.jointType;
-    if(jointType == OpenHRP::EJ_XY){
+    Body::ExtraJointType jointType = extraJointInfo.jointType;
+    if(jointType == Body::EJ_XY){
       joint.type = Body::EJ_XY;
-    }else if(jointType == OpenHRP::EJ_XYZ){
+    }else if(jointType == Body::EJ_XYZ){
       joint.type = Body::EJ_XYZ;
-    }else if(jointType == OpenHRP::EJ_Z){
+    }else if(jointType == Body::EJ_Z){
       joint.type = Body::EJ_Z;
 		}
 
@@ -585,9 +583,9 @@ void ModelLoaderHelper::setExtraJoints()
 
 };
 
-bool hrp::loadBodyFromBodyInfo(BodyPtr body, OpenHRP::BodyInfo_ptr bodyInfo, bool loadGeometryForCollisionDetection, Link *(*f)())
+bool loadBodyFromBodyInfo(BodyPtr body, BodyInfo_ptr bodyInfo, bool loadGeometryForCollisionDetection, Link *(*f)())
 {
-    if(!CORBA::is_nil(bodyInfo)){
+    if(bodyInfo){
         ModelLoaderHelper helper;
         if (f) helper.setLinkFactory(f);
         if(loadGeometryForCollisionDetection){
@@ -598,88 +596,22 @@ bool hrp::loadBodyFromBodyInfo(BodyPtr body, OpenHRP::BodyInfo_ptr bodyInfo, boo
     return false;
 }
 
-BodyInfo_var hrp::loadBodyInfo(const char* url, int& argc, char* argv[])
-{
-    CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
-    return loadBodyInfo(url, orb);
-}
 
-BodyInfo_var hrp::loadBodyInfo(const char* url, CORBA_ORB_var orb)
+
+
+
+bool loadBodyFromModelLoader(BodyPtr body, const char* url,  bool loadGeometryForCollisionDetection)
 {
-    CosNaming::NamingContext_var cxt;
-    try {
-        CORBA::Object_var nS = orb->resolve_initial_references("NameService");
-        cxt = CosNaming::NamingContext::_narrow(nS);
-    } catch(CORBA::SystemException& ex) {
-        std::cerr << "NameService doesn't exist" << std::endl;
-        return BodyInfo::_nil();
+  ModelLoader ml;
+  BodyInfo_ptr bodyInfo = ml.loadBodyInfo(url);
+
+  if(bodyInfo){
+    ModelLoaderHelper helper;
+    if(loadGeometryForCollisionDetection){
+      helper.enableCollisionDetectionModelLoading(true);
     }
-    return loadBodyInfo(url, cxt);
-}
+    return helper.createBody(body, bodyInfo);
+  }
 
-ModelLoader_var hrp::getModelLoader(CORBA_ORB_var orb)
-{
-    CosNaming::NamingContext_var cxt;
-    try {
-        CORBA::Object_var nS = orb->resolve_initial_references("NameService");
-        cxt = CosNaming::NamingContext::_narrow(nS);
-    } catch(CORBA::SystemException& ex) {
-        std::cerr << "NameService doesn't exist" << std::endl;
-        return NULL;
-    }
-    return getModelLoader(cxt);
-}
-
-ModelLoader_var hrp::getModelLoader(CosNaming::NamingContext_var cxt)
-{
-    CosNaming::Name ncName;
-    ncName.length(1);
-    ncName[0].id = CORBA::string_dup("ModelLoader");
-    ncName[0].kind = CORBA::string_dup("");
-    ModelLoader_var modelLoader = NULL;
-    try {
-        modelLoader = ModelLoader::_narrow(cxt->resolve(ncName));
-        modelLoader->_non_existent();
-    } catch(const CosNaming::NamingContext::NotFound &exc) {
-        std::cerr << "ModelLoader not found: ";
-        switch(exc.why) {
-        case CosNaming::NamingContext::missing_node:
-            std::cerr << "Missing Node" << std::endl;
-        case CosNaming::NamingContext::not_context:
-            std::cerr << "Not Context" << std::endl;
-            break;
-        case CosNaming::NamingContext::not_object:
-            std::cerr << "Not Object" << std::endl;
-            break;
-        }
-        modelLoader = ModelLoader::_nil();
-    } catch(CosNaming::NamingContext::CannotProceed &exc) {
-        std::cerr << "Resolve ModelLoader CannotProceed" << std::endl;
-        modelLoader = ModelLoader::_nil();
-    } catch(CosNaming::NamingContext::AlreadyBound &exc) {
-        std::cerr << "Resolve ModelLoader InvalidName" << std::endl;
-        modelLoader = ModelLoader::_nil();
-    } catch(...){
-        modelLoader = ModelLoader::_nil();
-    }
-    return modelLoader;
-}
-
-
-
-
-
-bool hrp::loadBodyFromModelLoader(BodyPtr body, const char* url, CosNaming::NamingContext_var cxt,  bool loadGeometryForCollisionDetection)
-{
-    BodyInfo_var bodyInfo = loadBodyInfo(url, cxt);
-
-    if(!CORBA::is_nil(bodyInfo)){
-        ModelLoaderHelper helper;
-        if(loadGeometryForCollisionDetection){
-            helper.enableCollisionDetectionModelLoading(true);
-        }
-        return helper.createBody(body, bodyInfo);
-    }
-
-    return false;
+  return false;
 }

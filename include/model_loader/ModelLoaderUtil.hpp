@@ -35,7 +35,7 @@ class ModelLoaderHelper
 {
 public:
   ModelLoaderHelper() {
-    collisionDetectionModelLoading = false;
+    collisionDetectionModelLoading_ = false;
     createLinkFunc_ = createNewLink;
   }
 
@@ -62,7 +62,7 @@ private:
                             const double *R, const double *p,
                             const ShapeInfo& shapeInfo);
   void addLinkVerticesAndTriangles(ColdetModelPtr& coldetModel, const LinkInfo& linkInfo);
-  void addLinkVerticesAndTriangles(ColdetModelPtr& coldetModel, const TransformedShapeIndex& tsi, const Matrix44& Tparent, ShapeInfoSequence_var& shapes, int& vertexIndex, int& triangleIndex);
+  void addLinkVerticesAndTriangles(ColdetModelPtr& coldetModel, const TransformedShapeIndex& tsi, const Matrix44& Tparent, ShapeInfoSequence& shapes, int& vertexIndex, int& triangleIndex);
   void setExtraJoints();
 };
 
@@ -73,14 +73,7 @@ private:
 namespace hrp
 {
     HRPMODEL_API bool loadBodyFromBodyInfo(BodyPtr body, BodyInfo_ptr bodyInfo, bool loadGeometryForCollisionDetection = false, Link *(*f)()=NULL);
-    HRPMODEL_API BodyInfo loadBodyInfo(const char* url, int& argc, char* argv[]);
-    HRPMODEL_API BodyInfo loadBodyInfo(const char* url, CORBA_ORB_var orb);
-    HRPMODEL_API BodyInfo loadBodyInfo(const char* url, CosNaming::NamingContext_var cxt);
-    HRPMODEL_API bool loadBodyFromModelLoader(BodyPtr body, const char* url, CORBA_ORB_var orb, bool loadGeometryForCollisionDetection = false);
-    HRPMODEL_API bool loadBodyFromModelLoader(BodyPtr body, const char* url, CosNaming::NamingContext_var cxt,  bool loadGeometryForCollisionDetection = false);
-    HRPMODEL_API bool loadBodyFromModelLoader(BodyPtr body, const char* url, int& argc, char* argv[],  bool loadGeometryForCollisionDetection = false);
-    HRPMODEL_API OpenHRP::ModelLoader_var getModelLoader(CosNaming::NamingContext_var cxt);
-    HRPMODEL_API OpenHRP::ModelLoader_var getModelLoader(CORBA_ORB_var orb);
+    HRPMODEL_API bool loadBodyFromModelLoader(BodyPtr body, const char* url, bool loadGeometryForCollisionDetection = false);
 };
 
 

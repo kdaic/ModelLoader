@@ -20,22 +20,24 @@
 #include <hrpModel/ModelNodeSet.h>
 #include <hrpCollision/ColdetModel.h>
 
-#include "shape_set_info_impl.hpp"
+#include "shape_set_info.hpp"
+
+#include "VrmlUtil.hpp"
 
 /// 物体モデル情報。
 /// 旧IDLのCharacterInfoに対応。
-class BodyInfo : ShapeSetInfo
+class BodyInfo : public ShapeSetInfo
 {
 public:
   BodyInfo();
   virtual ~BodyInfo();
 
-  char* name();
-  char* url();
-  StringSequence* info();
-  LinkInfoSequence* links();
-  AllLinkShapeIndexSequence* linkShapeIndices();
-  ExtraJointInfoSequence* extraJoints();
+  const std::string name();
+  const std::string url();
+  std::vector<std::string> info();
+  LinkInfoSequence links();
+  AllLinkShapeIndexSequence linkShapeIndices();
+  ExtraJointInfoSequence extraJoints();
 
   void loadModelFile(const std::string& filename);
 
@@ -109,5 +111,7 @@ private:
 
 typedef std::map<std::string, BodyInfo*> UrlToBodyInfoMap;
 UrlToBodyInfoMap urlToBodyInfoMap;
+
+typedef BodyInfo* BodyInfo_ptr;
 
 #endif // MODEL_LOADER_BODYINFO_HPP_INCLUDED

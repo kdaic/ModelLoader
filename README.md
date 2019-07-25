@@ -17,6 +17,12 @@ $ sudo apt-get install libeigen3-dev
 $ sudo apt-get install libboost-all-dev
 ```
 
+## libjpeg, libpng
+
+```
+$ sudo apt-get install libjpeg-dev libpng-dev
+```
+
 <!-- ## tvmet -->
 
 <!-- [Download & Install page](http://tvmet.sourceforge.net/build.html) -->

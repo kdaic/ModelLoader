@@ -8,13 +8,15 @@
 #include <map>
 #include <string>
 
-#include "Body.h"
-#include "Light.h"
-#include "Sensor.h"
+#include <hrpModel/Body.h>
+#include <hrpModel/Light.h>
+#include <hrpModel/Sensor.h>
+
+using namespace hrp;
 
 struct TransformedShapeIndex {
 
-  double transformMatrix[12];
+  boost::array<double,12> transformMatrix;
 
   short inlinedShapeTransformMatrixIndex;
 
@@ -39,9 +41,9 @@ struct SensorInfo
   /// - "Range"	     - 距離センサ
   std::string type;
 
-  gstd::string name;             ///< 本センサの識別名
+  std::string name;             ///< 本センサの識別名
   long id;                       ///< センサの種類ごとのセンサID
-  double translation[3];         ///< センサ設置位置(リンクローカル座標)
+  boost::array<double, 3> translation;         ///< センサ設置位置(リンクローカル座標)
   double rotation[4];            ///< センサ設置姿勢(リンクローカル座標)
   std::vector<float> specValues; ///< 各種仕様値(旧IDLのmaxValuesに相当)
   std::string specFile;          ///< 仕様記述ファイル名（本改良ではとりあえず空でよい）
@@ -55,9 +57,9 @@ typedef std::vector<SensorInfo> SensorInfoSequence;
 
 /// ハードウェアコンポーネント情報を格納する構造体
 struct HwcInfo {
-  std::string_member name; ///< 本HWCの識別名
+  std::string name; ///< 本HWCの識別名
   long id;                 ///< HWCの種類ごとのセンサID
-  double translation[3];   ///< HWC設置位置(リンクローカル座標)
+  boost::array<double,3> translation;   ///< HWC設置位置(リンクローカル座標)
   double rotation[4];      ///< HWC設置姿勢(リンクローカル座標)
   std::string url;         ///< HWCプロファイルのURL
 
@@ -72,20 +74,21 @@ typedef std::vector<HwcInfo> HwcInfoSequence;
 /// 複数個のセグメントノードを持つリンクをGUIから編集するために使用
 struct SegmentInfo {
 
-  std::string_member name;    ///< セグメント名
+  std::string name;    ///< セグメント名
   double mass;                ///< 質量
-  double centerOfMass[3];     ///< 重心位置
+  boost::array<double,3> centerOfMass;     ///< 重心位置
   double inertia[9];          ///< 慣性行列
   double transformMatrix[12];
   /// TransformedShapeIndexのインデックス列
   TransformedShapeIndexSequence shapeIndices;
 };
 
+typedef std::vector<SegmentInfo> SegmentInfoSequence;
 
 /// ライトの情報を格納する構造体
 struct LightInfo {
   std::string name;            ///< 名称
-  LightType type;              ///< ライトの種類
+  Light::LightType type;              ///< ライトの種類
   double transformMatrix[12];  ///< ライトの位置・姿勢（同時変換行列の上3行)
   double ambientIntensity;     // s, p, d
   double attenuation[3];       // s, p
@@ -99,6 +102,7 @@ struct LightInfo {
   double cutOffAngle;          // s
 };
 
+typedef std::vector<LightInfo> LightInfoSequence;
 
 /// 各リンクの情報を格納する構造体。
 /// 旧IDLでは interface としていたが、新IDLでは struct となることに注意。
@@ -106,9 +110,9 @@ struct LightInfo {
 struct LinkInfo {
   std::string name;             ///< リンク名
   short jointId;                ///< 関節識別値
-  std::string_member jointType; ///< 関節タイプ
+  std::string jointType; ///< 関節タイプ
   double jointValue;            ///< 関節初期値
-  double jointAxis[3];          ///< 関節軸(リンクローカル座標)
+  boost::array<double,3> jointAxis;          ///< 関節軸(リンクローカル座標)
   std::vector<double> ulimit;   ///< 最大関節値
   std::vector<double> llimit;   ///< 最小関節値
   std::vector<double> uvlimit;  ///< 最大関節速度値
@@ -148,6 +152,10 @@ struct LinkInfo {
   std::vector<std::string> specFiles;
 };
 
+typedef std::vector<LinkInfo> LinkInfoSequence;
+
+
+enum ShapePrimitiveType { SP_MESH, SP_BOX, SP_CYLINDER, SP_CONE, SP_SPHERE, SP_PLANE };
 
 ///  物体形状情報を格納する構造体。
 struct ShapeInfo {
@@ -199,13 +207,14 @@ struct ShapeInfo {
   ///
   /// なお、メッシュの表裏を区別する必要がある場合は、
   /// 連続する３要素が反時計回りとなる面を表とする。
-  std::vecotr<long> triangles;
+  std::vector<long> triangles;
 
   /// 本Faceに対応するAppearanceInfoの
   /// BodyInfo::appearances におけるインデックス。
   long appearanceIndex;
 };
 
+typedef std::vector<ShapeInfo> ShapeInfoSequence;
 
 /// 表面の見え情報を格納する構造体。
 ///
@@ -309,16 +318,116 @@ typedef std::vector<TextureInfo> TextureInfoSequence;
 /// 閉リンク機構のリンクの接続情報を格納する構造体。
 struct ExtraJointInfo {
   ///  Extra Joint name
-  std::string_member name;
+  std::string name;
   /// Possible types are "xyz","xy","z"
-  ExtraJointType jointType;
+  Body::ExtraJointType jointType;
   /// Constraint axes. Two or three orthogonal axes must be specifiedin the local coordinate of the first link
-  double axis[3];
+  boost::array<double,3> axis;
   /// Name of the link
   std::string link[2];
   /// Connection (joint) position in the local coordinate of the link
-  double point[2][3];
+  boost::array<double,3> point[2];
 };
+
+typedef std::vector<ExtraJointInfo> ExtraJointInfoSequence;
+
+
+/// 画像フォーマット
+enum PixelFormat {ARGB, // 4byte/pixel
+                  GRAY, // 1byte/pixel
+                  DEPTH,// 4byte/pixel
+                  RGB}; // 3byte/pixel
+
+
+/// 画像データ
+struct ImageData
+{
+  /// フォーマット
+  PixelFormat format;
+
+  /// 画像の幅
+  long width;
+
+  /// 画像の高さ
+  long height;
+
+  /// octet での画像データ
+  std::vector<unsigned char> octetData;
+
+  /// long での画像データ
+  std::vector<long> longData;
+
+  /// float での画像データ
+  std::vector<float> floatData;
+};
+
+
+/// カメラ
+/// @author	Ichitaro Kohara, MSTC
+/// @version	1.0(2001.02.16)
+class Camera
+{
+public:
+  /// カメラ種別
+  enum CameraType {
+    NONE, 		//!< read no information
+    COLOR, 		//!< read color buffer
+    MONO,
+    DEPTH, 		//!< read depth buffer
+    COLOR_DEPTH,	//!< read color buffer and depth buffer
+    MONO_DEPTH
+  };
+
+  /// カメラパラメタ
+  struct CameraParameter
+  {
+    /// カメラ種別
+    CameraType	type;
+
+    /// キャラクタの正面からの距離[m]
+    float	frontClipDistance;
+
+    /// キャラクタの後面までの距離[m]
+    float	backClipDistance;
+
+    /// 視野角[rad]
+    float	fieldOfView;
+
+    /// センサID
+    long	sensorId;
+
+    /// センサ名
+    std::string	sensorName;
+
+    /// ノード宣言の名前
+    std::string	defName;
+
+    /// 幅
+    long	width;
+
+    /// 高さ
+    long	height;
+
+    /// フレームレート[fps]
+    float  frameRate;
+  };
+
+  /// サーバを終了します。
+  void destroy();
+
+  /// カメラパラメタを取得します。
+  /// @return カメラパラメタ
+  CameraParameter
+  getCameraParameter();
+
+  /// イメージを取得します。
+  ImageData getImageData();
+};
+
+/// カメラ配列
+typedef std::vector<Camera> CameraSequence;
+
+
 
 enum AABBdataType { AABB_DEPTH, AABB_NUM };
 
