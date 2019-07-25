@@ -17,8 +17,7 @@ TOP_DIR_NAME = $(APP_NAME)
 # compiler
 # OS dependency
 ifeq ($(OS),Linux)
-	CXX:=g++ -std=c++0x
-	# CXX:=g++ -std=c++98
+	CXX:=g++ -std=c++98
 else ifeq ($(OS),QNX)
   CXX:=QCC -Vgcc_ntox86_cpp
 else
@@ -97,7 +96,12 @@ endif
 
 ##################################################################################
 # option
-CFLAGS = -g3 -Wall -D$(UNAME) -D_REENTRANT -DEIGEN_MPL2_ONLY
+CFLAGS = -g3 -Wall -D$(UNAME) -D_REENTRANT
+#
+# OS dependency
+ifeq ($(OS),QNX)
+	CFLAGS += -DEIGEN_MPL2_ONLY
+endif
 # CFLAGS += -Wextra -fPIC -Wl,-rpath=.  -DUSE_PIO -DUSE_DUMMYDEV
 
 ##################################################################################
