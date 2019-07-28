@@ -11,8 +11,13 @@ Ubuntu 18.04
 
 ## gcc
 
-newer version than 7.4.0
+version >= 7.4.0
 
+## c++
+
+version >= c++11
+
+&nbsp;
 
 # Requirements
 
@@ -49,11 +54,13 @@ $ sudo apt-get install libjpeg-dev libpng-dev
 
 ## Google test
 
-Please clone from https://github.com/google/googletest.git  
-And compile & install.  
+clone from https://github.com/google/googletest.git  
+and compile & install.  
 
-( Add the path of libgtest_main.{a,so} & libgtest.{a,so} into LD\_LIBRARY\_PATH.  
+( Add the Path of libgtest_main.{a/so} & libgtest.{a/so} into LD\_LIBRARY\_PATH.  
   Or fix linker option -L* of Makefile to link them )
+
+&nbsp;
 
 # Compile
 
@@ -63,15 +70,16 @@ Make at the top of directory.
 $ make
 ```
 
+&nbsp;
+
 # Destination
 
 ## static library of ModelLoader 
 
-generated in the lib/
+generated in the lib/, using HRP library 
 
 - libmodel_loader.a
 
-use HRP library 
 
 ## App binary
 
@@ -80,6 +88,7 @@ generated in the bin/
 - model\_loader : from src/main.cpp
 - unit\_test : from the sources test/*.cpp in the test/
 
+&nbsp;
 
 # Make Clean
 
@@ -98,9 +107,9 @@ $ make cleanall
 
 # Direcotry Map
 
-I separate Include direcotry from the source (the originals are one-packed),
-Because if library used at another place,
-source files are not necessary, includes are just needed.
+Include direcotry is separated from the source (the originals are one-package),
+Because it is useful & portable when libraries are used for another project.
+source files are not necessary, just only include files are needed.
 
 ```
 .
