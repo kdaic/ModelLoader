@@ -17,8 +17,8 @@ TOP_DIR_NAME = $(APP_NAME)
 # compiler
 # OS dependency
 ifeq ($(OS),Linux)
-	CXX:=g++ -std=c++0x
 	# CXX:=g++ -std=c++98
+	CXX:=g++ -std=c++11
 else ifeq ($(OS),QNX)
   CXX:=QCC -Vgcc_ntox86_cpp
 else
@@ -81,24 +81,42 @@ INCLUDES_PATH = $(addprefix -I, $(INCLUDES))
 
 ##################################################################################
 # library directoxry
-LOCAL_LINK_DIR = -L/usr/local/lib
+LINK_USR_LOCAL_DIR = -L/usr/local/lib
+#
 LINK_DIRS = -L. -L/usr/lib
-LINK_DIRS += $(LOCAL_LINK_DIRS)
+LINK_DIRS += $(LINK_USR_LOCAL_DIR)
 #
 # link (pay attension to linking-order)
 LINK_GTEST = -lgtest_main -lgtest
-LINK  = $(LINK_DIRS)
-LINK += -lm $(LINK_GTEST)
+LINK_JPEG = -ljpeg
+LINK_PNG = -lpng
+LINK_LAPACK = -llapack -lblas
+LINK_BOOST_COMPONETS = filesystem signals system regex program_options
+LINK_BOOST = $(addprefix -lboost_, $(LINK_BOOST_COMPONETS))
+#
+LINK = $(LINK_DIRS)
+LINK += -lm
+LINK += $(LINK_GTEST)
 #
 # OS dependency
 ifeq ($(OS),Linux)
-  LINK+=-lpthread -ldl
+  LINK +=-lpthread -ldl
 endif
-
+#
+LINK += $(LINK_JPEG)
+LINK += $(LINK_PNG)
+LINK += $(LINK_LAPACK)
+LINK += $(LINK_BOOST)
+#
+#
 ##################################################################################
 # option
-CFLAGS = -g3 -Wall -D$(UNAME) -D_REENTRANT -DEIGEN_MPL2_ONLY
-# CFLAGS += -Wextra -fPIC -Wl,-rpath=.  -DUSE_PIO -DUSE_DUMMYDEV
+CFLAGS = -g3 -Wall -D$(UNAME) -D_REENTRANT
+#
+# OS dependency
+ifeq ($(OS),QNX)
+	CFLAGS += -DEIGEN_MPL2_ONLY
+endif
 
 ##################################################################################
 # library & application
@@ -107,7 +125,8 @@ SLIB_APP = $(LIB_DIR)/lib$(APP_NAME).a
 EXE_APP  = $(BIN_DIR)/$(APP_NAME)
 TEST_APP = $(BIN_DIR)/unit_test
 #
-ALL_SRC = $(wildcard $(addsuffix /*.cpp, $(SRC_DIR)))
+ALL_SRC =  $(wildcard $(addsuffix /*.cpp, $(SRC_DIR)))
+ALL_SRC += $(wildcard $(addsuffix /*.cpp, $(SRC_APP_DIR)))
 EXE_SRC :=$(SRC_DIR)/main.cpp
 LIB_SRC = $(filter-out $(EXE_SRC), $(ALL_SRC))
 LIB_SRC += $(wildcard $(addsuffix /*.cpp, $(SRC_HRP_DIR)))
