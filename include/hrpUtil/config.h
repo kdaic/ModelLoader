@@ -10,14 +10,14 @@
 #ifndef OPENHRP_UTIL_CONFIG_H_INCLUDED
 #define OPENHRP_UTIL_CONFIG_H_INCLUDED
 
-// for Windows DLL export 
+// for Windows DLL export
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 # ifdef HRP_UTIL_MAKE_DLL
 #   define HRP_UTIL_EXPORT __declspec(dllexport)
-# else 
+# else
 #   define HRP_UTIL_EXPORT __declspec(dllimport)
 # endif
-#else 
+#else
 # define HRP_UTIL_EXPORT
 #endif /* Windows */
 

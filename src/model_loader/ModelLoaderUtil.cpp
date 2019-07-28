@@ -120,6 +120,9 @@ inline double getLimitValue(std::vector<double> limitseq, double defaultValue)
 }
 
 
+};
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -169,9 +172,11 @@ bool ModelLoaderHelper::createBody(BodyPtr& body, BodyInfo_ptr bodyInfo)
 }
 
 
-Link* ModelLoaderHelper::createLink(int index, const Matrix33& parentRs)
+Link* ModelLoaderHelper::createLink(int& index, const Matrix33& parentRs)
 {
-  const LinkInfo& linkInfo = linkInfoSeq_[index];
+  // std::cout << "linkInfo index : " << index << std::endl;
+  LinkInfo& linkInfo = linkInfoSeq_[index];
+
   int jointId = linkInfo.jointId;
 
   Link* link = (*createLinkFunc_)();
@@ -259,13 +264,19 @@ Link* ModelLoaderHelper::createLink(int index, const Matrix33& parentRs)
 
   //##### [Changed] Link Structure (convert NaryTree to BinaryTree).
   int childNum = linkInfo.childIndices.size();
-  for(int i = 0 ; i < childNum ; i++) {
+  // std::cout << "childNum : " << childNum << std::endl;
+  for(int i=0;  i < childNum; i++ ) {
     int childIndex = linkInfo.childIndices[i];
+    // std::cout << ", childIndex :  "<< childIndex << std::endl;
+    if(childIndex==0) {
+      continue;
+    }
     Link* childLink = createLink(childIndex, Rs);
     if(childLink) {
       children.push(childLink);
     }
   }
+
   while(!children.empty()){
     link->addChild(children.top());
     children.pop();
@@ -290,7 +301,7 @@ void ModelLoaderHelper::createLights(Link* link, const LightInfoSequence& lightI
     const LightInfo& lightInfo = lightInfoSeq[i];
     std::string name(lightInfo.name);
     Light *light = body_->createLight(link, lightInfo.type, name);
-    const double *T = lightInfo.transformMatrix;
+    const boost::array<double,12>& T = lightInfo.transformMatrix;
     light->localPos << T[3], T[7], T[11];
     light->localR << T[0], T[1], T[2], T[4], T[5], T[6], T[8], T[9], T[10];
     switch (lightInfo.type){
@@ -420,7 +431,7 @@ void ModelLoaderHelper::createColdetModel(Link* link, const LinkInfo& linkInfo)
   double R[9], p[3];
   for(unsigned int i=0; i < shapeIndices.size(); i++){
     shapeIndex = shapeIndices[i].shapeIndex;
-    const boost::array<double,12> tform = shapeIndices[i].transformMatrix;
+    const boost::array<double,12>& tform = shapeIndices[i].transformMatrix;
     R[0] = tform[0]; R[1] = tform[1]; R[2] = tform[2]; p[0] = tform[3];
     R[3] = tform[4]; R[4] = tform[5]; R[5] = tform[6]; p[1] = tform[7];
     R[6] = tform[8]; R[7] = tform[9]; R[8] = tform[10]; p[2] = tform[11];
@@ -460,7 +471,7 @@ void ModelLoaderHelper::addLinkVerticesAndTriangles
 (ColdetModelPtr& coldetModel, const TransformedShapeIndex& tsi, const Matrix44& Tparent, std::vector<ShapeInfo>& shapes, int& vertexIndex, int& triangleIndex)
 {
   short shapeIndex = tsi.shapeIndex;
-  const boost::array<double,12> M = tsi.transformMatrix;;
+  const boost::array<double,12> M = tsi.transformMatrix;
   Matrix44 T, Tlocal;
   Tlocal << M[0], M[1], M[2],  M[3],
     M[4], M[5], M[6],  M[7],
@@ -470,7 +481,7 @@ void ModelLoaderHelper::addLinkVerticesAndTriangles
 
   const ShapeInfo& shapeInfo = shapes[shapeIndex];
   int vertexIndexBase = vertexIndex;
-  const std::vector<float>& vertices = shapeInfo.vertices;
+  const std::vector<double>& vertices = shapeInfo.vertices;
   const int numVertices = vertices.size() / 3;
   for(int j=0; j < numVertices; ++j){
     Vector4 v(T * Vector4(vertices[j*3], vertices[j*3+1], vertices[j*3+2], 1.0));
@@ -580,10 +591,7 @@ void ModelLoaderHelper::setExtraJoints()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-
-};
-
-bool loadBodyFromBodyInfo(BodyPtr body, BodyInfo_ptr bodyInfo, bool loadGeometryForCollisionDetection, Link *(*f)())
+bool hrp::loadBodyFromBodyInfo(BodyPtr body, BodyInfo_ptr bodyInfo, bool loadGeometryForCollisionDetection, Link *(*f)())
 {
     if(bodyInfo){
         ModelLoaderHelper helper;
@@ -597,15 +605,13 @@ bool loadBodyFromBodyInfo(BodyPtr body, BodyInfo_ptr bodyInfo, bool loadGeometry
 }
 
 
-
-
-
-bool loadBodyFromModelLoader(BodyPtr body, const char* url,  bool loadGeometryForCollisionDetection)
+bool hrp::loadBodyFromModelLoader(BodyPtr body, const char* url,  bool loadGeometryForCollisionDetection)
+  throw (ModelLoaderException)
 {
   ModelLoader ml;
   BodyInfo_ptr bodyInfo = ml.loadBodyInfo(url);
 
-  if(bodyInfo){
+  if(bodyInfo!=NULL){
     ModelLoaderHelper helper;
     if(loadGeometryForCollisionDetection){
       helper.enableCollisionDetectionModelLoading(true);

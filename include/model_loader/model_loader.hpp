@@ -16,6 +16,8 @@
 #define MODEL_LOADER_HPP_INCLUDE
 
 #include "body_info.hpp"
+#include <hrpUtil/ImageConverter.h>
+#include <hrpUtil/VrmlParser.h>
 #include <sys/stat.h>
 
 using namespace hrp;
@@ -29,7 +31,7 @@ public:
   SceneInfo();
   virtual ~SceneInfo();
 
-  virtual char* url();
+  virtual std::string url();
   virtual TransformedShapeIndexSequence* shapeIndices();
 
   void load(const std::string& filename);
@@ -58,8 +60,8 @@ typedef SceneInfo* SceneInfo_ptr;
 class ModelLoader {
 
 public:
-  ModelLoader();
-  ~ModelLoader();
+  ModelLoader(){};
+  ~ModelLoader(){};
 
   typedef std::map<std::string, BodyInfo*> UrlToBodyInfoMap;
   UrlToBodyInfoMap urlToBodyInfoMap_;

@@ -48,6 +48,7 @@ void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, std::vector<do
     {
         MFFloat& mf = f.mfFloat();
         std::size_t n = mf.size();
+        out_v.clear();
         out_v.resize(n);
         for(std::size_t i=0; i < n; ++i){
             out_v[i] = mf[i];
@@ -126,7 +127,7 @@ void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, long* out_v)
 
 
 void copyVrmlRotationFieldToDblArray9
-(TProtoFieldMap& fieldMap, const std::string name, double* out_R)
+(TProtoFieldMap& fieldMap, const std::string name, boost::array<double,9>& out_R)
 {
   VrmlVariantField& rotationField = fieldMap[name];
 
@@ -173,7 +174,7 @@ void copyVrmlRotationFieldToDblArray9
 
 
 void copyVrmlRotationFieldToDblArray4
-(TProtoFieldMap& fieldMap, const std::string name, double* out_R)
+(TProtoFieldMap& fieldMap, const std::string name, boost::array<double,4>& out_R)
 {
     VrmlVariantField& rotationField = fieldMap[name];
 

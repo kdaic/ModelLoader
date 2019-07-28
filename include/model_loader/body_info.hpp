@@ -32,15 +32,15 @@ public:
   BodyInfo();
   virtual ~BodyInfo();
 
-  const std::string name();
-  const std::string url();
+  std::string name();
+  std::string url();
   std::vector<std::string> info();
   LinkInfoSequence links();
   AllLinkShapeIndexSequence linkShapeIndices();
   ExtraJointInfoSequence extraJoints();
 
-  void loadModelFile(const std::string& filename);
-
+  void loadModelFile(const std::string& filename)
+    throw(ModelLoaderException);
   void setLastUpdateTime(time_t time) { lastUpdate_ = time;};
   time_t getLastUpdateTime() { return lastUpdate_; }
   bool checkInlineFileUpdateTime() { return checkFileUpdateTime(); }
@@ -62,7 +62,7 @@ private:
   AABBdataType AABBdataType_;
 
  ///モデル名
-  std:: string name_;
+  std::string name_;
 
   /// モデルファイルのURL。
   std::string url_;
@@ -95,8 +95,9 @@ private:
 
   std::vector<ColdetModelPtr> linkColdetModels_;
 
-  int readJointNodeSet(JointNodeSetPtr jointNodeSet, int& currentIndex, int motherIndex);
-  void setJointParameters(int linkInfoIndex, VrmlProtoInstancePtr jointNode );
+  int readJointNodeSet(JointNodeSetPtr jointNodeSet, int& currentIndex, int motherIndex)
+    throw(ModelLoaderException);
+  void setJointParameters(int linkInfoIndex, VrmlProtoInstancePtr& jointNode );
   void setSegmentParameters(int linkInfoIndex, JointNodeSetPtr jointNodeSet);
   void setSensors(int linkInfoIndex, JointNodeSetPtr jointNodeSet);
   void setHwcs(int linkInfoIndex, JointNodeSetPtr jointNodeSet);
@@ -108,10 +109,7 @@ private:
 
 };
 
-
-typedef std::map<std::string, BodyInfo*> UrlToBodyInfoMap;
-UrlToBodyInfoMap urlToBodyInfoMap;
-
+// typedef boost::shared_ptr<BodyInfo> BodyInfo_ptr;
 typedef BodyInfo* BodyInfo_ptr;
 
 #endif // MODEL_LOADER_BODYINFO_HPP_INCLUDED

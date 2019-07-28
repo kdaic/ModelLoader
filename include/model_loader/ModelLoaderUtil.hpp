@@ -54,7 +54,7 @@ private:
   bool collisionDetectionModelLoading_;
   Link *(*createLinkFunc_)();
 
-  Link* createLink(int index, const Matrix33& parentRs);
+  Link* createLink(int& index, const Matrix33& parentRs);
   void createSensors(Link* link, const SensorInfoSequence& sensorInfoSeq, const Matrix33& Rs);
   void createLights(Link* link, const LightInfoSequence& lightInfoSeq, const Matrix33& Rs);
   void createColdetModel(Link* link, const LinkInfo& linkInfo);
@@ -73,7 +73,8 @@ private:
 namespace hrp
 {
     HRPMODEL_API bool loadBodyFromBodyInfo(BodyPtr body, BodyInfo_ptr bodyInfo, bool loadGeometryForCollisionDetection = false, Link *(*f)()=NULL);
-    HRPMODEL_API bool loadBodyFromModelLoader(BodyPtr body, const char* url, bool loadGeometryForCollisionDetection = false);
+    HRPMODEL_API bool loadBodyFromModelLoader(BodyPtr body, const char* url, bool loadGeometryForCollisionDetection = false)
+      throw (ModelLoaderException);
 };
 
 

@@ -22,7 +22,8 @@ namespace {
 
 
 BodyInfo::BodyInfo() :
-  ShapeSetInfo()
+  ShapeSetInfo(),
+  name_(""), url_("")
 {
   lastUpdate_ = 0;
 }
@@ -40,13 +41,13 @@ const std::string& BodyInfo::topUrl()
 }
 
 
-const std::string BodyInfo::name()
+std::string BodyInfo::name()
 {
   return name_;
 }
 
 
-const std::string BodyInfo::url()
+std::string BodyInfo::url()
 {
   return url_;
 }
@@ -83,6 +84,7 @@ ExtraJointInfoSequence BodyInfo::extraJoints()
   @endif
 */
 void BodyInfo::loadModelFile(const std::string& url)
+  throw(ModelLoaderException)
 {
   string filename( deleteURLScheme( url ) );
 
@@ -114,6 +116,7 @@ void BodyInfo::loadModelFile(const std::string& url)
       VrmlParser parser;
       parser.load(filename);
 
+      links_.clear();
       links_.resize(1);
       LinkInfo &linfo = links_[0];
       linfo.name = "root";
@@ -153,32 +156,34 @@ void BodyInfo::loadModelFile(const std::string& url)
   }
 
   const string& humanoidName = modelNodeSet.humanoidNode()->defName;
-  name_ = humanoidName.c_str();
+  name_ = humanoidName;
   const MFString& info = modelNodeSet.humanoidNode()->fields["info"].mfString();
+  info_.clear();
   info_.resize(info.size());
   for (unsigned int i=0; i<info_.size(); i++){
     info_[i] = info[i];
   }
 
   int numJointNodes = modelNodeSet.numJointNodes();
-
+  // links_.clear();
   links_.resize(numJointNodes);
   if( 0 < numJointNodes ) {
     int currentIndex = 0;
     JointNodeSetPtr rootJointNodeSet = modelNodeSet.rootJointNodeSet();
     readJointNodeSet(rootJointNodeSet, currentIndex, -1);
   }
-
+  linkShapeIndices_.clear();
   linkShapeIndices_.resize(numJointNodes);
   for(int i = 0 ; i < numJointNodes ; ++i) {
     linkShapeIndices_[i] = links_[i].shapeIndices;
   }
 
   // build coldetModels
+  linkColdetModels_.clear();
   linkColdetModels_.resize(numJointNodes);
   for(int linkIndex = 0; linkIndex < numJointNodes ; ++linkIndex){
-    ColdetModelPtr coldetModel;
-    coldetModel->setName(std::string(links_[linkIndex].name));
+    ColdetModelPtr coldetModel(new ColdetModel);
+    coldetModel->setName(links_[linkIndex].name);
     int vertexIndex = 0;
     int triangleIndex = 0;
 
@@ -210,6 +215,7 @@ void BodyInfo::loadModelFile(const std::string& url)
   //originlinkShapeIndices_ = linkShapeIndices_;
 
 	int n = modelNodeSet.numExtraJointNodes();
+  extraJoints_.clear();
 	extraJoints_.resize(n);
   for(int i=0; i < n; ++i){
 
@@ -244,6 +250,7 @@ void BodyInfo::loadModelFile(const std::string& url)
 
 
 int BodyInfo::readJointNodeSet(JointNodeSetPtr jointNodeSet, int& currentIndex, int parentIndex)
+  throw(ModelLoaderException)
 {
   int index = currentIndex;
   currentIndex++;
@@ -257,15 +264,19 @@ int BodyInfo::readJointNodeSet(JointNodeSetPtr jointNodeSet, int& currentIndex, 
     JointNodeSetPtr childJointNodeSet = jointNodeSet->childJointNodeSets[i];
     int childIndex = readJointNodeSet(childJointNodeSet, currentIndex, index);
 
-    long childIndicesLength = linkInfo.childIndices.size();
-    linkInfo.childIndices.resize( childIndicesLength + 1 );
-    linkInfo.childIndices[childIndicesLength] = childIndex;
+    // long childIndicesLength = linkInfo.childIndices.size();
+    // linkInfo.childIndices.clear();
+    // linkInfo.childIndices.resize( childIndicesLength + 1 );
+    // linkInfo.childIndices[childIndicesLength] = childIndex;
+    linkInfo.childIndices.push_back(childIndex);
   }
+
 
   links_[index] = linkInfo;
   try	{
     vector<VrmlProtoInstancePtr>& segmentNodes = jointNodeSet->segmentNodes;
     int numSegment = segmentNodes.size();
+    links_[index].segments.clear();
     links_[index].segments.resize(numSegment);
     for(int i = 0 ; i < numSegment ; ++i){
       SegmentInfo segmentInfo;
@@ -279,12 +290,14 @@ int BodyInfo::readJointNodeSet(JointNodeSetPtr jointNodeSet, int& currentIndex, 
       }
       traverseShapeNodes(segmentNodes[i].get(), T, links_[index].shapeIndices, links_[index].inlinedShapeTransformMatrices, &topUrl());
       long e =links_[index].shapeIndices.size();
+      segmentInfo.shapeIndices.clear();
       segmentInfo.shapeIndices.resize(e-s);
       for(int j=0, k=s; k<e; k++)
         segmentInfo.shapeIndices[j++].shapeIndex = k;
       links_[index].segments[i] = segmentInfo;
     }
-    setJointParameters(index, jointNodeSet->jointNode);
+    VrmlProtoInstancePtr jointNode = jointNodeSet->jointNode;
+    setJointParameters(index, jointNode);
     setSegmentParameters(index, jointNodeSet);
     setSensors(index, jointNodeSet);
     setHwcs(index, jointNodeSet);
@@ -295,6 +308,7 @@ int BodyInfo::readJointNodeSet(JointNodeSetPtr jointNodeSet, int& currentIndex, 
     string error = name.empty() ? "Unnamed JointNode" : name;
     error += ": ";
     error += ex.description;
+    cerr << error << endl;
     throw ModelLoaderException( error.c_str() );
   }
 
@@ -302,7 +316,7 @@ int BodyInfo::readJointNodeSet(JointNodeSetPtr jointNodeSet, int& currentIndex, 
 }
 
 
-void BodyInfo::setJointParameters(int linkInfoIndex, VrmlProtoInstancePtr jointNode)
+void BodyInfo::setJointParameters(int linkInfoIndex, VrmlProtoInstancePtr& jointNode)
 {
   LinkInfo& linkInfo = links_[linkInfoIndex];
 
@@ -355,6 +369,7 @@ void BodyInfo::setJointParameters(int linkInfoIndex, VrmlProtoInstancePtr jointN
     copyVrmlField( fmap, "climit", linkInfo.climit );
   }else{
     //std::cout << "No climit type. climit was ignored." << std::endl;
+    linkInfo.climit.clear();
     linkInfo.climit.resize((std::size_t)0); // dummy
   }
 
@@ -394,7 +409,7 @@ void BodyInfo::setSegmentParameters(int linkInfoIndex, JointNodeSetPtr jointNode
     Matrix44 T = jointNodeSet->transforms.at(i);
     boost::array<double,3>& centerOfMass = segmentInfo.centerOfMass;
     double& mass =segmentInfo.mass;
-    double* inertia = segmentInfo.inertia;
+    boost::array<double,9>& inertia = segmentInfo.inertia;
     TProtoFieldMap& fmap = segmentNodes[i]->fields;
     copyVrmlField( fmap, "centerOfMass",     centerOfMass );
     copyVrmlField( fmap, "mass",             &mass );
@@ -453,6 +468,7 @@ void BodyInfo::setSensors(int linkInfoIndex, JointNodeSetPtr jointNodeSet)
   vector<VrmlProtoInstancePtr>& sensorNodes = jointNodeSet->sensorNodes;
 
   int numSensors = sensorNodes.size();
+  linkInfo.sensors.clear();
   linkInfo.sensors.resize(numSensors);
 
   for(int i = 0 ; i < numSensors ; ++i) {
@@ -470,6 +486,7 @@ void BodyInfo::setHwcs(int linkInfoIndex, JointNodeSetPtr jointNodeSet)
   vector<VrmlProtoInstancePtr>& hwcNodes = jointNodeSet->hwcNodes;
 
   int numHwcs = hwcNodes.size();
+  linkInfo.hwcs.clear();
   linkInfo.hwcs.resize(numHwcs);
 
   for(int i = 0 ; i < numHwcs ; ++i) {
@@ -487,6 +504,7 @@ void BodyInfo::setLights(int linkInfoIndex, JointNodeSetPtr jointNodeSet)
          Eigen::aligned_allocator<pair<Matrix44, VrmlNodePtr> > >& lightNodes = jointNodeSet->lightNodes;
 
   int numLights = lightNodes.size();
+  linkInfo.lights.clear();
   linkInfo.lights.resize(numLights);
 
   for(int i = 0 ; i < numLights ; ++i) {
@@ -529,6 +547,7 @@ void BodyInfo::readSensorNode(int linkInfoIndex, SensorInfo& sensorInfo, VrmlPro
     }
 
     if(sensorType == "Force") {
+      sensorInfo.specValues.clear();
       sensorInfo.specValues.resize( 6 );
       boost::array<double,3> maxForce, maxTorque;
       copyVrmlField(fmap, "maxForce", maxForce );
@@ -541,6 +560,7 @@ void BodyInfo::readSensorNode(int linkInfoIndex, SensorInfo& sensorInfo, VrmlPro
       sensorInfo.specValues[5] = maxTorque[2];
 
     } else if(sensorType == "RateGyro") {
+      sensorInfo.specValues.clear();
       sensorInfo.specValues.resize( 3 );
       boost::array<double,3> maxAngularVelocity;
       copyVrmlField(fmap, "maxAngularVelocity", maxAngularVelocity);
@@ -549,6 +569,7 @@ void BodyInfo::readSensorNode(int linkInfoIndex, SensorInfo& sensorInfo, VrmlPro
       sensorInfo.specValues[2] = maxAngularVelocity[2];
 
     } else if( sensorType == "Acceleration" ){
+      sensorInfo.specValues.clear();
       sensorInfo.specValues.resize( 3 );
       boost::array<double,3> maxAcceleration;
       copyVrmlField(fmap, "maxAcceleration", maxAcceleration);
@@ -557,6 +578,7 @@ void BodyInfo::readSensorNode(int linkInfoIndex, SensorInfo& sensorInfo, VrmlPro
       sensorInfo.specValues[2] = maxAcceleration[2];
 
     } else if( sensorType == "Vision" ){
+      sensorInfo.specValues.clear();
       sensorInfo.specValues.resize( 7 );
 
       double specValues[3];
@@ -597,6 +619,7 @@ void BodyInfo::readSensorNode(int linkInfoIndex, SensorInfo& sensorInfo, VrmlPro
       copyVrmlField(fmap, "frameRate", &frameRate);
       sensorInfo.specValues[6] = frameRate;
     } else if( sensorType == "Range" ){
+      sensorInfo.specValues.clear();
       sensorInfo.specValues.resize( 4 );
       double v;
       copyVrmlField(fmap, "scanAngle", &v);
@@ -762,10 +785,12 @@ void BodyInfo::changetoBoundingBox(unsigned int* inputData){
     if(_depth >= 0 ){
       linkColdetModels_[i]->getBoundingBoxData(_depth, boundingBoxData);
       std::vector<TransformedShapeIndex> tsiMap;
+      links_[i].shapeIndices.clear();
       links_[i].shapeIndices.resize(0);
       SensorInfoSequence& sensors = links_[i].sensors;
       for (unsigned int j=0; j<sensors.size(); j++){
         SensorInfo& sensor = sensors[j];
+        sensor.shapeIndices.clear();
         sensor.shapeIndices.resize(0);
       }
 
@@ -796,6 +821,7 @@ void BodyInfo::changetoBoundingBox(unsigned int* inputData){
 
         if(!flg){
           int num = links_[i].shapeIndices.size();
+          // links_[i].shapeIndices.clear();
           links_[i].shapeIndices.resize(num+1);
           TransformedShapeIndex& tsi = links_[i].shapeIndices[num];
           tsi.inlinedShapeTransformMatrixIndex = -1;

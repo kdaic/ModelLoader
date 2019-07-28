@@ -13,11 +13,11 @@ using namespace hrp;
 
 
 /// モデルローダの処理においてエラーが生じたときに生成される例外。
-class ModelLoaderException : public std::exception
+class ModelLoaderException : public std::runtime_error
 {
 public:
   ModelLoaderException(const std::string& ex="") :
-    std::exception() {};
+    std::runtime_error(ex) {};
 
   ~ModelLoaderException() throw() {}
   /// エラーの説明
@@ -35,8 +35,8 @@ void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, long* out_v);
 void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, boost::array<double,3>& out_v);
 void copyVrmlField(TProtoFieldMap& fmap, const std::string& name, boost::array<double,9>& out_m);
 
-void copyVrmlRotationFieldToDblArray9(TProtoFieldMap& fieldMap, const std::string name, double* out_R);
-void copyVrmlRotationFieldToDblArray4(TProtoFieldMap& fieldMap, const std::string name, double* out_R);
+void copyVrmlRotationFieldToDblArray9(TProtoFieldMap& fieldMap, const std::string name, boost::array<double,9>& out_R);
+void copyVrmlRotationFieldToDblArray4(TProtoFieldMap& fieldMap, const std::string name, boost::array<double,4>& out_R);
 
 std::string setTexturefileUrl( std::string modelfileDir, hrp::MFString urls);
 #endif

@@ -31,7 +31,6 @@ using namespace hrp;
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 
-
 // the dynamic casts are necessary since the changetoBoundingBox functions are not part of BodyInfo class.
 static void g_setLastUpdateTime(BodyInfo* bodyInfo, time_t time)
 {
@@ -81,8 +80,95 @@ static void g_changetoBoundingBox(BodyInfo* bodyInfo, unsigned int* depth)
 }
 
 
-////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 
+SceneInfo::SceneInfo() :
+  ShapeSetInfo(),
+  url_("")
+{
+
+}
+
+
+SceneInfo::~SceneInfo()
+{
+
+}
+
+
+const std::string& SceneInfo::topUrl()
+{
+  return url_;
+}
+
+
+std::string SceneInfo::url()
+{
+  return url_;
+}
+
+
+TransformedShapeIndexSequence* SceneInfo::shapeIndices()
+{
+  return new TransformedShapeIndexSequence(shapeIndices_);
+}
+
+
+void SceneInfo::load(const std::string& url)
+{
+  string filename(deleteURLScheme(url));
+
+  // URL文字列の' \' 区切り子を'/' に置き換え  Windows ファイルパス対応
+  string url2;
+  url2 = filename;
+  replace( url2, string("\\"), string("/") );
+  filename = url2;
+  url_ = url2;
+
+  try {
+    VrmlParser parser;
+    parser.load(filename);
+
+    Matrix44 E(Matrix44::Identity());
+
+    while(VrmlNodePtr node = parser.readNode()){
+      if(!node->isCategoryOf(PROTO_DEF_NODE)){
+        applyTriangleMeshShaper(node);
+        traverseShapeNodes(node.get(), E, shapeIndices_, inlinedShapeTransformMatrices_, &topUrl());
+      }
+    }
+  } catch(std::exception& ex){
+    cout << ex.what() << endl;
+    throw ModelLoaderException(ex.what());
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+BodyInfo_ptr ModelLoader::loadBodyInfo(const char* url)
+  throw (ModelLoaderException)
+{
+  BodyInfo_ptr bodyInfo;
+  try {
+    bodyInfo = getBodyInfo(url);
+  } catch(ModelLoaderException& ex){
+    std::cerr << "ModelLoaderException : " << ex.description << std::endl;
+  }
+  return bodyInfo;
+}
+
+
+BodyInfo_ptr ModelLoader::getBodyInfo(const char* url)
+  throw (ModelLoaderException)
+{
+  ModelLoadOption option;
+  option.readImage = false;
+  option.AABBdata.clear();
+  option.AABBdata.resize(0);
+  option.AABBtype = AABB_NUM;
+  return getBodyInfoEx(url, option);
+}
 
 BodyInfo_ptr ModelLoader::getBodyInfoEx(const char* url0, const ModelLoadOption& option)
     throw (ModelLoaderException)
@@ -117,30 +203,6 @@ BodyInfo_ptr ModelLoader::getBodyInfoEx(const char* url0, const ModelLoadOption&
     return bodyInfo;
   }
   return loadBodyInfoEx(url0, option);
-}
-
-
-BodyInfo_ptr ModelLoader::getBodyInfo(const char* url)
-  throw (ModelLoaderException)
-{
-  ModelLoadOption option;
-  option.readImage = false;
-  option.AABBdata.resize(0);
-  option.AABBtype = AABB_NUM;
-  return getBodyInfoEx(url, option);
-}
-
-
-BodyInfo_ptr ModelLoader::loadBodyInfo(const char* url)
-  throw (ModelLoaderException)
-{
-  BodyInfo_ptr bodyInfo;
-  try {
-    bodyInfo = getBodyInfo(url);
-  } catch(ModelLoaderException& ex){
-    std::cerr << "ModelLoaderException : " << ex.description << std::endl;
-  }
-  return bodyInfo;
 }
 
 

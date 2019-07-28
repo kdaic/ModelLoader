@@ -18,9 +18,9 @@ struct TransformedShapeIndex {
 
   boost::array<double,12> transformMatrix;
 
-  short inlinedShapeTransformMatrixIndex;
+  int inlinedShapeTransformMatrixIndex;
 
-  short shapeIndex;
+  int shapeIndex;
 };
 
 typedef std::vector<TransformedShapeIndex> TransformedShapeIndexSequence;
@@ -44,8 +44,8 @@ struct SensorInfo
   std::string name;             ///< 本センサの識別名
   long id;                       ///< センサの種類ごとのセンサID
   boost::array<double, 3> translation;         ///< センサ設置位置(リンクローカル座標)
-  double rotation[4];            ///< センサ設置姿勢(リンクローカル座標)
-  std::vector<float> specValues; ///< 各種仕様値(旧IDLのmaxValuesに相当)
+  boost::array<double, 4> rotation;            ///< センサ設置姿勢(リンクローカル座標)
+  std::vector<double> specValues; ///< 各種仕様値(旧IDLのmaxValuesに相当)
   std::string specFile;          ///< 仕様記述ファイル名（本改良ではとりあえず空でよい）
   /// 本リンクに対応する形状情報の変換行列付きインデックス列
   TransformedShapeIndexSequence shapeIndices;
@@ -60,7 +60,7 @@ struct HwcInfo {
   std::string name; ///< 本HWCの識別名
   long id;                 ///< HWCの種類ごとのセンサID
   boost::array<double,3> translation;   ///< HWC設置位置(リンクローカル座標)
-  double rotation[4];      ///< HWC設置姿勢(リンクローカル座標)
+  boost::array<double, 4> rotation;      ///< HWC設置姿勢(リンクローカル座標)
   std::string url;         ///< HWCプロファイルのURL
 
   /// 本HWCに対応する形状情報の変換行列付きインデックス列
@@ -77,8 +77,8 @@ struct SegmentInfo {
   std::string name;    ///< セグメント名
   double mass;                ///< 質量
   boost::array<double,3> centerOfMass;     ///< 重心位置
-  double inertia[9];          ///< 慣性行列
-  double transformMatrix[12];
+  boost::array<double,9> inertia;          ///< 慣性行列
+  boost::array<double, 12> transformMatrix;
   /// TransformedShapeIndexのインデックス列
   TransformedShapeIndexSequence shapeIndices;
 };
@@ -89,17 +89,17 @@ typedef std::vector<SegmentInfo> SegmentInfoSequence;
 struct LightInfo {
   std::string name;            ///< 名称
   Light::LightType type;              ///< ライトの種類
-  double transformMatrix[12];  ///< ライトの位置・姿勢（同時変換行列の上3行)
-  double ambientIntensity;     // s, p, d
-  double attenuation[3];       // s, p
-  double color[3];             // s, p, d
-  double intensity;            // s, p, d
-  double location[3];          // s, p
-  bool on;                     // s, p, d
-  double radius;               // s, p
-  double direction[3];         // s,    d
-  double beamWidth;            // s
-  double cutOffAngle;          // s
+  boost::array<double,12> transformMatrix; ///< ライトの位置・姿勢（同時変換行列の上3行)
+  double ambientIntensity;                 /// s, p, d
+  boost::array<double,3> attenuation;      /// s, p
+  boost::array<double,3> color;            /// s, p, d
+  double intensity;                        /// s, p, d
+  boost::array<double,3> location;         /// s, p
+  bool on;                                 /// s, p, d
+  double radius;                           /// s, p
+  boost::array<double,3> direction;        /// s,    d
+  double beamWidth;                        /// s
+  double cutOffAngle;                      /// s
 };
 
 typedef std::vector<LightInfo> LightInfoSequence;
@@ -109,7 +109,7 @@ typedef std::vector<LightInfo> LightInfoSequence;
 /// equivalentInertia は廃止。
 struct LinkInfo {
   std::string name;             ///< リンク名
-  short jointId;                ///< 関節識別値
+  int jointId;                ///< 関節識別値
   std::string jointType; ///< 関節タイプ
   double jointValue;            ///< 関節初期値
   boost::array<double,3> jointAxis;          ///< 関節軸(リンクローカル座標)
@@ -118,28 +118,28 @@ struct LinkInfo {
   std::vector<double> uvlimit;  ///< 最大関節速度値
   std::vector<double> lvlimit;  ///< 最小関節速度値
   std::vector<double> climit;   ///< 最大関節電流値 (tlimit = climit x grarRatio x torqueConst)
-  double translation[3];        ///< ローカル座標系原点(親リンク相対)
+  boost::array<double,3> translation;        ///< ローカル座標系原点(親リンク相対)
 
   /// ローカル座標系姿勢(親リンク相対)
   /// 回転軸(x, y, z) + 回転角度の並びのサイズ４の配列(VRMLと同じ)
-  double rotation[4];
+  boost::array<double,4> rotation;
 
   double mass;                     ///< 質量
-  double centerOfMass[3];          ///< 重心位置
-  double inertia[9];               ///< 慣性行列
+  boost::array<double,3> centerOfMass; ///< 重心位置
+  boost::array<double,9> inertia;      ///< 慣性行列
   double rotorInertia;             ///< ロータ慣性
   double rotorResistor;            ///< ロータ抵抗
   double gearRatio;                ///< ギア比
   double torqueConst;              ///< トルク定数
   double encoderPulse;             ///< エンコーダパルス
-  short parentIndex;               ///< 親リンクインデックス
-  std::vector<short> childIndices; ///< 子リンクインデックス列
+  int parentIndex;               ///< 親リンクインデックス
+  std::vector<int> childIndices; ///< 子リンクインデックス列
   /// 本リンクに対応する形状情報の変換行列付きインデックス列
   std::vector<TransformedShapeIndex> shapeIndices;
   /// 形状データのAABBtreeの階層の深さ＋１
-  short AABBmaxDepth;
+  int AABBmaxDepth;
   /// 形状データのAABBtreeのBoundingBoxの最大個数
-  short AABBmaxNum;
+  int AABBmaxNum;
   /// shapeIndices の inlinedShapeTransformMatrixIndex によって指し示される行列リスト
   std::vector<boost::array<double,12> > inlinedShapeTransformMatrices;
   std::vector<SensorInfo> sensors;  ///< 本リンクに設置されたセンサの情報
@@ -194,11 +194,11 @@ struct ShapeInfo {
   ///
   /// - SPHERE
   ///   0: radius
-  std::vector<float> primitiveParameters;
+  std::vector<double> primitiveParameters;
 
   /// 表面メッシュを構成する頂点データ。
   /// 連続する３要素が頂点位置の３次元ベクトルに対応する。
-  std::vector<float> vertices;
+  std::vector<double> vertices;
 
   /// 表面メッシュを構成する三角形における頂点の組み合わせを格納したデータ。
   /// 各要素はverticesに格納された頂点のインデックスを表し、
@@ -229,7 +229,7 @@ struct AppearanceInfo {
   /// 法線データ。連続する３要素をx, y, zとし、一法線ベクトルに対応。
   /// この配列のサイズが0の場合、法線はクライアントが必要に応じて
   /// 生成しなければならない。
-  std::vector<float> normals;
+  std::vector<double> normals;
 
   /// 法線対応付けデータ。
   /// normalPerVertex が true なら、ShapeInfo の vertices の並びと対応させる。
@@ -241,11 +241,11 @@ struct AppearanceInfo {
 
   bool solid;
 
-  float creaseAngle;
+  double creaseAngle;
 
   /// 色データ。連続する３要素をR,G,Bとし一色に対応。各要素の値の範囲は 0 から 1.0。
   /// この配列のサイズが0の場合、色はmaterialInfoのものになる。
-  std::vector<float> colors;
+  std::vector<double> colors;
 
   std::vector<long> colorIndices;
 
@@ -260,9 +260,9 @@ struct AppearanceInfo {
   /// 対応するテクスチャがなければ、-1。
   long textureIndex;
 
-  std::vector<float> textureCoordinate;
+  std::vector<double> textureCoordinate;
   std::vector<long> textureCoordIndices;
-  double textransformMatrix[9];
+  boost::array<double,9> textransformMatrix;
 };
 
 typedef std::vector<AppearanceInfo> AppearanceInfoSequence;
@@ -273,17 +273,17 @@ typedef std::vector<AppearanceInfo> AppearanceInfoSequence;
 /// 全ての変数の値の範囲は 0.0 〜 1.0。
 struct MaterialInfo {
 
-  float ambientIntensity;
+  double ambientIntensity;
 
-  float diffuseColor[3];
+  boost::array<double,3> diffuseColor;
 
-  float emissiveColor[3];
+  boost::array<double,3> emissiveColor;
 
-  float shininess;
+  double shininess;
 
-  float specularColor[3];
+  boost::array<double,3> specularColor;
 
-  float transparency;
+  double transparency;
 };
 
 typedef std::vector<MaterialInfo> MaterialInfoSequence;
@@ -304,9 +304,9 @@ struct TextureInfo {
   /// image フィールドのサイズが 0 でなくて、urlのサイズも 0 でない場合は、
   /// クライアントは好きな方のやり方でテクスチャ画像を獲得すればよい。
   std::vector<unsigned char> image;
-  short numComponents;
-  short width;
-  short height;
+  int numComponents;
+  int width;
+  int height;
   bool repeatS;
   bool repeatT;
   std::string url;
@@ -357,8 +357,8 @@ struct ImageData
   /// long での画像データ
   std::vector<long> longData;
 
-  /// float での画像データ
-  std::vector<float> floatData;
+  /// double での画像データ
+  std::vector<double> doubleData;
 };
 
 
@@ -385,13 +385,13 @@ public:
     CameraType	type;
 
     /// キャラクタの正面からの距離[m]
-    float	frontClipDistance;
+    double	frontClipDistance;
 
     /// キャラクタの後面までの距離[m]
-    float	backClipDistance;
+    double	backClipDistance;
 
     /// 視野角[rad]
-    float	fieldOfView;
+    double	fieldOfView;
 
     /// センサID
     long	sensorId;
@@ -409,7 +409,7 @@ public:
     long	height;
 
     /// フレームレート[fps]
-    float  frameRate;
+    double  frameRate;
   };
 
   /// サーバを終了します。
@@ -433,7 +433,7 @@ enum AABBdataType { AABB_DEPTH, AABB_NUM };
 
 struct ModelLoadOption {
   bool readImage;
-  std::vector<short> AABBdata;
+  std::vector<int> AABBdata;
   AABBdataType AABBtype;
 };
 

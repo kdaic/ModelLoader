@@ -117,6 +117,7 @@ void ShapeSetInfo::traverseShapeNodes
     if(inlineNode){
       if(!inline_count){
         int inlinedShapeMIndex = inlinedShapeM.size();
+        inlinedShapeM.clear();
         inlinedShapeM.resize(inlinedShapeMIndex+1);
         int p = 0;
         for(int row=0; row < 3; ++row){
@@ -175,6 +176,7 @@ void ShapeSetInfo::traverseShapeNodes
 
     if(shapeInfoIndex >= 0){
       long length = io_shapeIndices.size();
+      io_shapeIndices.clear();
       io_shapeIndices.resize(length + 1);
       TransformedShapeIndex& tsi = io_shapeIndices[length];
       tsi.shapeIndex = shapeInfoIndex;
@@ -204,6 +206,7 @@ int ShapeSetInfo::createShapeInfo(VrmlShape* shapeNode, const SFString* url)
   if(triangleMesh){
 
     shapeInfoIndex = shapes_.size();
+    shapes_.clear();
     shapes_.resize(shapeInfoIndex + 1);
     ShapeInfo& shapeInfo = shapes_[shapeInfoIndex];
 
@@ -224,6 +227,7 @@ void ShapeSetInfo::setTriangleMesh(ShapeInfo& shapeInfo, VrmlIndexedFaceSet* tri
 {
   const MFVec3f& vertices = triangleMesh->coord->point;
   size_t numVertices = vertices.size();
+  shapeInfo.vertices.clear();
   shapeInfo.vertices.resize(numVertices * 3);
 
   size_t pos = 0;
@@ -236,6 +240,7 @@ void ShapeSetInfo::setTriangleMesh(ShapeInfo& shapeInfo, VrmlIndexedFaceSet* tri
 
   const MFInt32& indices = triangleMesh->coordIndex;
   const size_t numTriangles = indices.size() / 4;
+  shapeInfo.triangles.clear();
   shapeInfo.triangles.resize(numTriangles * 3);
 
   int dpos = 0;
@@ -252,7 +257,7 @@ void ShapeSetInfo::setTriangleMesh(ShapeInfo& shapeInfo, VrmlIndexedFaceSet* tri
 void ShapeSetInfo::setPrimitiveProperties(ShapeInfo& shapeInfo, VrmlShape* shapeNode)
 {
   shapeInfo.primitiveType = SP_MESH;
-  std::vector<float>& param = shapeInfo.primitiveParameters;
+  std::vector<double>& param = shapeInfo.primitiveParameters;
 
   VrmlNode *node = triangleMeshShaper_.getOriginalGeometry(shapeNode).get();
   VrmlGeometry* originalGeometry = dynamic_cast<VrmlGeometry *>(node);
@@ -265,6 +270,7 @@ void ShapeSetInfo::setPrimitiveProperties(ShapeInfo& shapeInfo, VrmlShape* shape
 
       if(VrmlBox* box = dynamic_cast<VrmlBox*>(originalGeometry)){
         shapeInfo.primitiveType = SP_BOX;
+        param.clear();
         param.resize(3);
         for(int i=0; i < 3; ++i){
           param[i] = box->size[i];
@@ -272,6 +278,7 @@ void ShapeSetInfo::setPrimitiveProperties(ShapeInfo& shapeInfo, VrmlShape* shape
 
       } else if(VrmlCone* cone = dynamic_cast<VrmlCone*>(originalGeometry)){
         shapeInfo.primitiveType = SP_CONE;
+        param.clear();
         param.resize(4);
         param[0] = cone->bottomRadius;
         param[1] = cone->height;
@@ -280,6 +287,7 @@ void ShapeSetInfo::setPrimitiveProperties(ShapeInfo& shapeInfo, VrmlShape* shape
 
       } else if(VrmlCylinder* cylinder = dynamic_cast<VrmlCylinder*>(originalGeometry)){
         shapeInfo.primitiveType = SP_CYLINDER;
+        param.clear();
         param.resize(5);
         param[0] = cylinder->radius;
         param[1] = cylinder->height;
@@ -290,6 +298,7 @@ void ShapeSetInfo::setPrimitiveProperties(ShapeInfo& shapeInfo, VrmlShape* shape
 
       } else if(VrmlSphere* sphere = dynamic_cast<VrmlSphere*>(originalGeometry)){
         shapeInfo.primitiveType = SP_SPHERE;
+        param.clear();
         param.resize(1);
         param[0] = sphere->radius;
       }
@@ -300,6 +309,7 @@ void ShapeSetInfo::setPrimitiveProperties(ShapeInfo& shapeInfo, VrmlShape* shape
     if (protoInstance && protoInstance->proto->protoName == "Plane"){
       VrmlBox *box = dynamic_cast<VrmlBox *>(protoInstance->actualNode.get());
       shapeInfo.primitiveType = SP_PLANE;
+      param.clear();
       param.resize(3);
       for (int i=0; i<3; i++){
         param[i] = box->size[i];
@@ -317,6 +327,7 @@ int ShapeSetInfo::createAppearanceInfo
  const SFString *url)
 {
   int appearanceIndex = appearances_.size();
+  appearances_.clear();
   appearances_.resize(appearanceIndex + 1);
   AppearanceInfo& appInfo = appearances_[appearanceIndex];
 
@@ -357,6 +368,7 @@ void ShapeSetInfo::setColors(AppearanceInfo& appInfo, VrmlIndexedFaceSet* triang
 {
   const MFColor& colors = triangleMesh->color->color;
   int numColors = colors.size();
+  appInfo.colors.clear();
   appInfo.colors.resize(numColors * 3);
 
   int pos = 0;
@@ -372,6 +384,7 @@ void ShapeSetInfo::setColors(AppearanceInfo& appInfo, VrmlIndexedFaceSet* triang
   if(numOrgIndices > 0){
     if(triangleMesh->colorPerVertex){
       const int numTriangles = numOrgIndices / 4; // considering delimiter element '-1'
+      appInfo.colorIndices.clear();
       appInfo.colorIndices.resize(numTriangles * 3);
       int dpos = 0;
       int spos = 0;
@@ -382,6 +395,7 @@ void ShapeSetInfo::setColors(AppearanceInfo& appInfo, VrmlIndexedFaceSet* triang
         spos++; // skip delimiter '-1'
       }
     } else { // color per face
+      appInfo.colorIndices.clear();
       appInfo.colorIndices.resize(numOrgIndices);
       for(int i=0; i < numOrgIndices; ++i){
         appInfo.colorIndices[i] = orgIndices[i];
@@ -395,6 +409,7 @@ void ShapeSetInfo::setNormals(AppearanceInfo& appInfo, VrmlIndexedFaceSet* trian
 {
   const MFVec3f& normals = triangleMesh->normal->vector;
   int numNormals = normals.size();
+  appInfo.normals.clear();
   appInfo.normals.resize(numNormals * 3);
 
   int pos = 0;
@@ -410,6 +425,7 @@ void ShapeSetInfo::setNormals(AppearanceInfo& appInfo, VrmlIndexedFaceSet* trian
   if(numOrgIndices > 0){
     if(triangleMesh->normalPerVertex){
       const int numTriangles = numOrgIndices / 4; // considering delimiter element '-1'
+      appInfo.normalIndices.clear();
       appInfo.normalIndices.resize(numTriangles * 3);
       int dpos = 0;
       int spos = 0;
@@ -420,6 +436,7 @@ void ShapeSetInfo::setNormals(AppearanceInfo& appInfo, VrmlIndexedFaceSet* trian
         spos++; // skip delimiter '-1'
       }
     } else { // normal per face
+      appInfo.normalIndices.clear();
       appInfo.normalIndices.resize(numOrgIndices);
       for(int i=0; i < numOrgIndices; ++i){
         appInfo.normalIndices[i] = orgIndices[i];
@@ -431,6 +448,7 @@ void ShapeSetInfo::setNormals(AppearanceInfo& appInfo, VrmlIndexedFaceSet* trian
 void ShapeSetInfo::setTexCoords(AppearanceInfo& appInfo, VrmlIndexedFaceSet* triangleMesh )
 {
 	int numCoords = triangleMesh->texCoord->point.size();
+  appInfo.textureCoordinate.clear();
   appInfo.textureCoordinate.resize(numCoords * 2);
 
   Matrix33 m;
@@ -447,6 +465,7 @@ void ShapeSetInfo::setTexCoords(AppearanceInfo& appInfo, VrmlIndexedFaceSet* tri
 
   int numIndex = triangleMesh->texCoordIndex.size();
   if(numIndex > 0){
+    appInfo.textureCoordIndices.clear();
     appInfo.textureCoordIndices.resize(numIndex * 3 / 4);
     for(int i=0, j=0; i < numIndex; i++){
       if(triangleMesh->texCoordIndex[i] != -1)
@@ -509,6 +528,7 @@ int ShapeSetInfo::createMaterialInfo(VrmlMaterialPtr& materialNode)
 
     // materials_に追加する //
     materialInfoIndex = materials_.size();
+    materials_.clear();
     materials_.resize(materialInfoIndex + 1 );
     materials_[materialInfoIndex] = material;
 
@@ -551,6 +571,7 @@ int ShapeSetInfo::createTextureInfo(VrmlTexturePtr& textureNode, const SFString 
           texture.width = image->width;
           texture.numComponents = image->numComponents;
           unsigned long pixelsLength = image->pixels.size();
+          texture.image.clear();
           texture.image.resize( pixelsLength );
           for(unsigned long j = 0 ; j < pixelsLength ; j++ ){
             texture.image[j] = image->pixels[j];
@@ -567,6 +588,7 @@ int ShapeSetInfo::createTextureInfo(VrmlTexturePtr& textureNode, const SFString 
       texture.numComponents = pixelTextureNode->image.numComponents;
 
       size_t pixelsLength =  pixelTextureNode->image.pixels.size();
+      texture.image.clear();
       texture.image.resize( pixelsLength );
       for(size_t j = 0 ; j < pixelsLength ; j++ ){
         texture.image[j] = pixelTextureNode->image.pixels[j];
@@ -576,6 +598,7 @@ int ShapeSetInfo::createTextureInfo(VrmlTexturePtr& textureNode, const SFString 
     }
 
     textureInfoIndex = textures_.size();
+    textures_.clear();
     textures_.resize(textureInfoIndex + 1);
     textures_[textureInfoIndex] = texture;
   }
@@ -605,6 +628,7 @@ std::string ShapeSetInfo::getModelFileDirPath(const std::string& url)
   if(pos != string::npos){
     //  ディレクトリパス文字列 //
     dirPath = filepath;
+    dirPath.clear();
     dirPath.resize(pos + 1);
   }
 
@@ -631,7 +655,7 @@ void ShapeSetInfo::setColdetModelTriangles
 
   const ShapeInfo& shapeInfo = shapes_[shapeIndex];
   int vertexIndexBase = coldetModel->getNumVertices();
-  const std::vector<float>& vertices = shapeInfo.vertices;
+  const std::vector<double>& vertices = shapeInfo.vertices;
   const int numVertices = vertices.size() / 3;
   coldetModel->setNumVertices(coldetModel->getNumVertices()+numVertices);
   for(int j=0; j < numVertices; ++j){
@@ -666,12 +690,14 @@ void ShapeSetInfo::setBoundingBoxData(const Vector3& boxSize, int shapeIndex){
   triangleMesh->coord = new VrmlCoordinate();
   triangleMeshShaper_.convertBox(box, triangleMesh);
 
+  shapes_.clear();
   shapes_.resize(shapeIndex+1);
   ShapeInfo& shapeInfo = shapes_[shapeIndex];
   VrmlIndexedFaceSet* faceSet = triangleMesh.get();
   setTriangleMesh(shapeInfo, faceSet);
   shapeInfo.primitiveType = SP_BOX;
-  std::vector<float>& param = shapeInfo.primitiveParameters;
+  std::vector<double>& param = shapeInfo.primitiveParameters;
+  param.clear();
   param.resize(3);
   for(int i=0; i < 3; ++i)
     param[i] = box->size[i];
@@ -681,6 +707,7 @@ void ShapeSetInfo::setBoundingBoxData(const Vector3& boxSize, int shapeIndex){
 }
 
 void ShapeSetInfo::createAppearanceInfo(){
+  appearances_.clear();
   appearances_.resize(1);
   AppearanceInfo& appInfo = appearances_[0];
   appInfo.normalPerVertex = false;
@@ -688,13 +715,18 @@ void ShapeSetInfo::createAppearanceInfo(){
   appInfo.solid = false;
   appInfo.creaseAngle = 0.0;
   appInfo.textureIndex = -1;
+  appInfo.normals.clear();
   appInfo.normals.resize(0);
+  appInfo.normalIndices.clear();
   appInfo.normalIndices.resize(0);
+  appInfo.colors.clear();
   appInfo.colors.resize(0);
+  appInfo.colorIndices.clear();
   appInfo.colorIndices.resize(0);
   appInfo.materialIndex = 0;
   appInfo.textureIndex = -1;
 
+  materials_.clear();
   materials_.resize(1);
   MaterialInfo& material = materials_[0];
   material.ambientIntensity = 0.2;
