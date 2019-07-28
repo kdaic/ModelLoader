@@ -9,7 +9,7 @@ Just Model Loader library in the hrplib of OpenHRP3.1 -- Not depended on CORBA, 
 
 Ubuntu 18.04
 
-## gcc
+## g++
 
 version >= 7.4.0
 
