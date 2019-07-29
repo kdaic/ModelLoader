@@ -3,9 +3,10 @@ model\_loader library
 
 Just Model Loader library in the hrplib of OpenHRP3.1 -- Not depended on CORBA, omniORB library.
 
-# Original
+Original source is **openHRP3**.
 
-[openHRP3.1](https://github.com/fkanehiro/openhrp3.git)
+- URL : https://github.com/fkanehiro/openhrp3.git
+- tag : 3.1.9
 
 &nbsp;
 
@@ -84,7 +85,7 @@ $ make
 
 # 4. Destination
 
-## 4.1. static library of ModelLoader 
+## 4.1. static library of ModelLoader
 
 generated in the lib/, using HRP library 
 
@@ -96,7 +97,7 @@ generated in the lib/, using HRP library
 generated in the bin/
 
 - **model\_loader** : from src/main.cpp
-- **unit\_test** : from the sources test/*.cpp in the test/
+- **unit\_test** : from the sources test/*.cpp with google test.
 
 &nbsp;
 
@@ -108,7 +109,7 @@ generated in the bin/
 $ make clean
 ```
 
-the "clanall" option removes not only \*.o but also lib/libmodel_loader.a and binaries(bin/*).
+"clanall" option is removing not only \*.o but also lib/libmodel_loader.a and binaries(bin/*).
 
 ```
 $ make cleanall
@@ -117,8 +118,8 @@ $ make cleanall
 
 # 6. Directory Map
 
-Include direcotry is separated from the source (the originals are one-package),
-Because it is useful & portable when libraries are used for another project.
+Include files are separated from the source (the original's are in one-package),
+Because it is useful & portable when libraries are used for another place (project),
 source files are not necessary, just only include files are needed.
 
 ```
@@ -126,15 +127,15 @@ source files are not necessary, just only include files are needed.
 ├── bin
 ├── lib
 ├── include
-│   ├── hrpCollision
+│   ├── hrpCollision : all the same as original oprnhrp3/hrplib/hrpCollision
 │   │   └── Opcode
 │   │       └── Ice
-│   ├── hrpModel
-│   ├── hrpUtil
+│   ├── hrpModel     : all the same as original oprnhrp3/hrplib/hrpModel
+│   ├── hrpUtil      : all the same as original oprnhrp3/hrplib/hrpUtil
 │   │   ├── Jpeg-6b
 │   │   ├── lpng1232
 │   │   └── zlib123
-│   └── model_loader
+│   └── model_loader : derive from original oprnhrp3/server/ModelLoader
 ├── src
 │   ├── hrpCollision
 │   │   └── Opcode
