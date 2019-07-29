@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "model_loader.hpp"
+#include "ModelLoader.hpp"
 #include "ModelLoaderUtil.hpp"
 
 using namespace hrp;

@@ -15,7 +15,7 @@
   @author kdaic
 */
 
-#include "body_info.hpp"
+#include "BodyInfo.hpp"
 
 #include <map>
 #include <vector>

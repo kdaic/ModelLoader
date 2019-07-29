@@ -26,7 +26,7 @@
 #include "Sensor.h"
 #include "Light.h"
 
-#include "model_loader.hpp"
+#include "ModelLoader.hpp"
 #include "ModelLoaderUtil.hpp"
 
 using namespace std;

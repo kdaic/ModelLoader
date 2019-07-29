@@ -1,4 +1,3 @@
-#include "model_loader.hpp"
 #include <gtest/gtest.h>
 
 

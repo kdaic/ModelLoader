@@ -16,7 +16,7 @@
    @author kdaic
 */
 
-#include "model_loader.hpp"
+#include "ModelLoader.hpp"
 
 #include "Link.h"
 #include "Sensor.h"

@@ -25,7 +25,7 @@
 #include <hrpUtil/Eigen4d.h>
 #include <hrpCollision/ColdetModel.h>
 
-#include "model_info.hpp"
+#include "ModelInfo.hpp"
 
 /// 形状データ一式を格納するオブジェクト。
 class ShapeSetInfo

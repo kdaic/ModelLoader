@@ -15,7 +15,7 @@
   @author kdaic
 */
 
-#include "shape_set_info.hpp"
+#include "ShapeSetInfo.hpp"
 
 #include <map>
 #include <vector>
