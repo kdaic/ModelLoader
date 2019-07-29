@@ -19,62 +19,16 @@
 #pragma warning(disable:4996)
 #endif
 
-#include "Body.h"
-#include "model_loader.hpp"
 #include <string>
 #include <sstream>
 
-///////////////////////////////////////////////////////////////////////////////////////////
+#include "Body.h"
 
-namespace
-{
-
-static Link *createNewLink() { return new Link(); }
-
-class ModelLoaderHelper
-{
-public:
-  ModelLoaderHelper() {
-    collisionDetectionModelLoading_ = false;
-    createLinkFunc_ = createNewLink;
-  }
-
-  void enableCollisionDetectionModelLoading(bool isEnabled) {
-    collisionDetectionModelLoading_ = isEnabled;
-  };
-  void setLinkFactory(Link *(*f)()) { createLinkFunc_ = f; }
-
-  bool createBody(BodyPtr& body,  BodyInfo_ptr bodyInfo);
-
-private:
-  BodyPtr body_;
-  std::vector<LinkInfo> linkInfoSeq_;
-  std::vector<ShapeInfo> shapeInfoSeq_;
-  std::vector<ExtraJointInfo> extraJointInfoSeq_;
-  bool collisionDetectionModelLoading_;
-  Link *(*createLinkFunc_)();
-
-  Link* createLink(int& index, const Matrix33& parentRs);
-  void createSensors(Link* link, const SensorInfoSequence& sensorInfoSeq, const Matrix33& Rs);
-  void createLights(Link* link, const LightInfoSequence& lightInfoSeq, const Matrix33& Rs);
-  void createColdetModel(Link* link, const LinkInfo& linkInfo);
-  void addLinkPrimitiveInfo(ColdetModelPtr& coldetModel,
-                            const double *R, const double *p,
-                            const ShapeInfo& shapeInfo);
-  void addLinkVerticesAndTriangles(ColdetModelPtr& coldetModel, const LinkInfo& linkInfo);
-  void addLinkVerticesAndTriangles(ColdetModelPtr& coldetModel, const TransformedShapeIndex& tsi, const Matrix44& Tparent, ShapeInfoSequence& shapes, int& vertexIndex, int& triangleIndex);
-  void setExtraJoints();
-};
-
-};
-
-///////////////////////////////////////////////////////////////////////////////////////////
 
 namespace hrp
 {
-    HRPMODEL_API bool loadBodyFromBodyInfo(BodyPtr body, BodyInfo_ptr bodyInfo, bool loadGeometryForCollisionDetection = false, Link *(*f)()=NULL);
-    HRPMODEL_API bool loadBodyFromModelLoader(BodyPtr body, const char* url, bool loadGeometryForCollisionDetection = false)
-      throw (ModelLoaderException);
+    HRPMODEL_API bool loadBodyFromModelLoader(BodyPtr body, const char* url, bool loadGeometryForCollisionDetection = false);
+
 };
 
 

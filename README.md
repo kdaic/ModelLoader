@@ -105,7 +105,7 @@ $ make cleanall
 ```
 
 
-# Direcotry Map
+# Directory Map
 
 Include direcotry is separated from the source (the originals are one-package),
 Because it is useful & portable when libraries are used for another project.

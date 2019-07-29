@@ -3,6 +3,8 @@
 #include <hrpModel/Link.h>
 #include <hrpModel/LinkTraverse.h>
 #include <hrpModel/JointPath.h>
+
+#include "model_loader.hpp"
 #include "ModelLoaderUtil.hpp"
 
 #include <boost/intrusive_ptr.hpp>
