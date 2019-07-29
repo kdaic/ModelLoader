@@ -10,7 +10,7 @@ Original source is **openHRP3**.
 
 &nbsp;
 
-# 1. Dependency
+# 1. Requirements
 
 ## 1.1. OS
 
@@ -26,11 +26,11 @@ c++ version >= c++11
 
 &nbsp;
 
-# 2. Requirements
+# 2. Dependency
 
 ## 2.1. LAPACK & BLAS
 
-Not needed?
+needless?
 
 ```
 $ sudo apt-get install liblapack-dev libblas-dev
@@ -48,8 +48,8 @@ $ sudo apt-get install libeigen3-dev
 $ sudo apt-get install libboost-all-dev
 ```
 
-check apt-get pakcage libboost-dev version.
-version >= 1.65 in my environment.
+check apt-get pakcage libboost-dev version.  
+version >= 1.65 is OK as far as I can see.
 
 ```
 dpkg -s libboost-dev
@@ -73,7 +73,7 @@ and compile & install.
 
 &nbsp;
 
-# 3. Compile
+# 3. Make Compile
 
 Make at the top of directory.
 
@@ -85,7 +85,7 @@ $ make
 
 # 4. Destination
 
-## 4.1. static library of ModelLoader
+## 4.1. Static library of ModelLoader
 
 generated in the lib/, using HRP library 
 
@@ -103,13 +103,13 @@ generated in the bin/
 
 # 5. Make Clean
 
-"clean" option is removing object files(*.o).
+"clean" option is removing object files(\*.o) and emacs backup(\*~).
 
 ```
 $ make clean
 ```
 
-"clanall" option is removing not only \*.o but also lib/libmodel_loader.a and binaries(bin/*).
+"cleanall" option is removing not only \*.o but also lib/libmodel_loader.a and binaries(bin/*).
 
 ```
 $ make cleanall
@@ -118,9 +118,9 @@ $ make cleanall
 
 # 6. Directory Map
 
-Include files are separated from the source (the original's are in one-package),
-Because it is useful & portable when libraries are used for another place (project),
-source files are not necessary, just only include files are needed.
+Include files are separated from the source (the original's are in one-package),  
+Because it is useful & portable when libraries are used for another place (project),  
+source files are not necessary, just only include files are needed.  
 
 ```
 .
@@ -152,9 +152,9 @@ source files are not necessary, just only include files are needed.
 ```
 &nbsp;
 
-# License
+# 7. License
 
-Copyright (c) 2008, kdaic.
+Copyright (c) 2008, kdaic.  
 All rights reserved. This program is made available under the terms of the
 Eclipse Public License v1.0 which accompanies this distribution, and is
 available at http://www.eclipse.org/legal/epl-v10.html
