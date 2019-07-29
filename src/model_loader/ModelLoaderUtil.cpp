@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2019, kdaic
+ * Original source:
+ *   https://github.com/fkanehiro/openhrp3/blob/3.1.9/hrplib/hrpModel/ModelLoaderUtil.cpp
  * Copyright (c) 2008, AIST, the University of Tokyo and General Robotix Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
@@ -10,16 +13,21 @@
 /**
    @author Shin'ichiro Nakaoka
    @author Ergovision
+   @author kdaic
 */
 
-#include "ModelLoaderUtil.hpp"
-#include "Link.h"
-#include "Sensor.h"
-#include "Light.h"
+#include <stack>
+
 #include <hrpUtil/Eigen3d.h>
 #include <hrpUtil/Eigen4d.h>
 #include <hrpCollision/ColdetModel.h>
-#include <stack>
+
+#include "Link.h"
+#include "Sensor.h"
+#include "Light.h"
+
+#include "model_loader.hpp"
+#include "ModelLoaderUtil.hpp"
 
 using namespace std;
 using namespace hrp;
@@ -28,100 +36,60 @@ namespace {
 
 const bool debugMode = false;
 
-// ostream& operator<<(ostream& os, std::vector<double>& data)
-// {
-//   int size = data.size();
-//   for(int i=0; i < size-1; ++i){
-//     cout << data[i] << ", ";
-//   }
-//   cout << data[size-1];
+///////////////////////////////////////////////////////////////////////////////////////////
 
-//   return os;
-// }
+namespace
+{
 
+static Link *createNewLink() { return new Link(); }
 
-// ostream& operator<<(ostream& os, double data[3])
-// {
-//   cout << data[0] << ", " << data[1] << ", " << data[2];
-//   return os;
-// }
+class ModelLoaderHelper
+{
+public:
+  ModelLoaderHelper() {
+    collisionDetectionModelLoading_ = false;
+    createLinkFunc_ = createNewLink;
+  }
 
+  void enableCollisionDetectionModelLoading(bool isEnabled) {
+    collisionDetectionModelLoading_ = isEnabled;
+  };
+  void setLinkFactory(Link *(*f)()) { createLinkFunc_ = f; }
 
-// ostream& operator<<(ostream& os, double data[9])
-// {
-//   for(unsigned int i=0; i < 8; ++i){
-//     cout << data[i] << ", ";
-//   }
-//   cout << data[9];
-//   return os;
-// }
+  bool createBody(BodyPtr& body,  BodyInfo_ptr bodyInfo);
 
+private:
+  BodyPtr body_;
+  std::vector<LinkInfo> linkInfoSeq_;
+  std::vector<ShapeInfo> shapeInfoSeq_;
+  std::vector<ExtraJointInfo> extraJointInfoSeq_;
+  bool collisionDetectionModelLoading_;
+  Link *(*createLinkFunc_)();
 
-// void dumpBodyInfo(BodyInfo_ptr bodyInfo)
-// {
-//   cout << "<<< BodyInfo >>>\n";
+  Link* createLink(int& index, const Matrix33& parentRs);
+  void createSensors(Link* link, const SensorInfoSequence& sensorInfoSeq, const Matrix33& Rs);
+  void createLights(Link* link, const LightInfoSequence& lightInfoSeq, const Matrix33& Rs);
+  void createColdetModel(Link* link, const LinkInfo& linkInfo);
+  void addLinkPrimitiveInfo(ColdetModelPtr& coldetModel,
+                            const double *R, const double *p,
+                            const ShapeInfo& shapeInfo);
+  void addLinkVerticesAndTriangles(ColdetModelPtr& coldetModel, const LinkInfo& linkInfo);
+  void addLinkVerticesAndTriangles(ColdetModelPtr& coldetModel, const TransformedShapeIndex& tsi, const Matrix44& Tparent, ShapeInfoSequence& shapes, int& vertexIndex, int& triangleIndex);
+  void setExtraJoints();
+};
 
-//   std::string charaName = bodyInfo->name();
+};
 
-//   cout << "name: " << charaName << "\n";
-
-//   std::vector<LinkInfo> linkInfoSeq = bodyInfo->links();
-
-//   int numLinks = linkInfoSeq->length();
-//   cout << "num links: " << numLinks << "\n";
-
-//   for(int i=0; i < numLinks; ++i){
-
-//     const LinkInfo& linkInfo = linkInfoSeq[i];
-//     std::string linkName = linkInfo.name;
-
-//     cout << "<<< LinkInfo: " << linkName << " (index " << i << ") >>>\n";
-//     cout << "parentIndex: " << linkInfo.parentIndex << "\n";
-
-//     const std::vector<short>& childIndices = linkInfo.childIndices;
-//     if(childIndices.length() > 0){
-//       cout << "childIndices: ";
-//       for(unsigned int i=0; i < childIndices.length(); ++i){
-//         cout << childIndices[i] << " ";
-//       }
-//       cout << "\n";
-//     }
-
-//     const std::vector<SensorInfo>& sensorInfoSeq = linkInfo.sensors;
-
-//     int numSensors = sensorInfoSeq.length();
-//     cout << "num sensors: " << numSensors << "\n";
-
-//     for(int j=0; j < numSensors; ++j){
-//       cout << "<<< SensorInfo >>>\n";
-//       const SensorInfo& sensorInfo = sensorInfoSeq[j];
-//       cout << "id: " << sensorInfo.id << "\n";
-//       cout << "type: " << sensorInfo.type << "\n";
-
-//       std::string sensorName = sensorInfo.name;
-//       cout << "name: \"" << sensorName << "\"\n";
-
-//       const double* p = sensorInfo.translation;
-//       cout << "translation: " << p[0] << ", " << p[1] << ", " << p[2] << "\n";
-
-//       const double* r = sensorInfo.rotation;
-//       cout << "rotation: " << r[0] << ", " << r[1] << ", " << r[2] << ", " << r[3] << "\n";
-
-//     }
-//   }
-
-//   cout.flush();
-// }
+///////////////////////////////////////////////////////////////////////////////////////////
 
 
-inline double getLimitValue(std::vector<double> limitseq, double defaultValue)
+inline double g_getLimitValue(std::vector<double> limitseq, double defaultValue)
 {
   return (limitseq.size() == 0) ? defaultValue : limitseq[0];
 }
 
 
 };
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -247,11 +215,11 @@ Link* ModelLoaderHelper::createLink(int& index, const Matrix33& parentRs)
 
   double maxlimit = (numeric_limits<double>::max)();
 
-  link->ulimit  = getLimitValue(ulimit,  +maxlimit);
-  link->llimit  = getLimitValue(llimit,  -maxlimit);
-  link->uvlimit = getLimitValue(uvlimit, +maxlimit);
-  link->lvlimit = getLimitValue(lvlimit, -maxlimit);
-  link->climit  = getLimitValue(climit,  +maxlimit);
+  link->ulimit  = g_getLimitValue(ulimit,  +maxlimit);
+  link->llimit  = g_getLimitValue(llimit,  -maxlimit);
+  link->uvlimit = g_getLimitValue(uvlimit, +maxlimit);
+  link->lvlimit = g_getLimitValue(lvlimit, -maxlimit);
+  link->climit  = g_getLimitValue(climit,  +maxlimit);
 
   link->c = Rs * Vector3(linkInfo.centerOfMass[0], linkInfo.centerOfMass[1], linkInfo.centerOfMass[2]);
 
@@ -264,13 +232,8 @@ Link* ModelLoaderHelper::createLink(int& index, const Matrix33& parentRs)
 
   //##### [Changed] Link Structure (convert NaryTree to BinaryTree).
   int childNum = linkInfo.childIndices.size();
-  // std::cout << "childNum : " << childNum << std::endl;
   for(int i=0;  i < childNum; i++ ) {
     int childIndex = linkInfo.childIndices[i];
-    // std::cout << ", childIndex :  "<< childIndex << std::endl;
-    if(childIndex==0) {
-      continue;
-    }
     Link* childLink = createLink(childIndex, Rs);
     if(childLink) {
       children.push(childLink);
@@ -591,7 +554,10 @@ void ModelLoaderHelper::setExtraJoints()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-bool hrp::loadBodyFromBodyInfo(BodyPtr body, BodyInfo_ptr bodyInfo, bool loadGeometryForCollisionDetection, Link *(*f)())
+namespace hrp {
+
+HRPMODEL_API bool loadBodyFromBodyInfo(BodyPtr body, BodyInfo_ptr bodyInfo, bool loadGeometryForCollisionDetection = false, Link *(*f)()=NULL)
+  throw (ModelLoaderException)
 {
     if(bodyInfo){
         ModelLoaderHelper helper;
@@ -602,11 +568,12 @@ bool hrp::loadBodyFromBodyInfo(BodyPtr body, BodyInfo_ptr bodyInfo, bool loadGeo
         return helper.createBody(body, bodyInfo);
     }
     return false;
-}
+};
+
+}; // namespace hrp
 
 
 bool hrp::loadBodyFromModelLoader(BodyPtr body, const char* url,  bool loadGeometryForCollisionDetection)
-  throw (ModelLoaderException)
 {
   ModelLoader ml;
   BodyInfo_ptr bodyInfo = ml.loadBodyInfo(url);

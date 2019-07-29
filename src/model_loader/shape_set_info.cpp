@@ -1,3 +1,20 @@
+/*
+* Copyright (c) 2019, kdaic
+ * Original source:
+ *   https://github.com/fkanehiro/openhrp3/tree/3.1.9/server/ModelLoader/ShapeSetInfo_impl.cpp
+ * Copyright (c) 2008, AIST, the University of Tokyo and General Robotix Inc.
+ * All rights reserved. This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v10.html
+ * Contributors:
+ * National Institute of Advanced Industrial Science and Technology (AIST)
+ */
+
+/*!
+  @author Shin'ichiro Nakaoka
+  @author kdaic
+*/
+
 #include "shape_set_info.hpp"
 
 #include <map>

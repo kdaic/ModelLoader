@@ -1,6 +1,12 @@
 #
 # Makefile
 #
+#
+# Copyright (C) 2019, kdaic
+# All right reserved.
+# This software is made under the MIT License.
+# http://opensource.org/licenses/mit-license.php
+#
 ##################################################################################
 OS:=$(shell uname -s)
 UNAME := $(shell uname)
@@ -17,7 +23,6 @@ TOP_DIR_NAME = $(APP_NAME)
 # compiler
 # OS dependency
 ifeq ($(OS),Linux)
-	# CXX:=g++ -std=c++98
 	CXX:=g++ -std=c++11
 else ifeq ($(OS),QNX)
   CXX:=QCC -Vgcc_ntox86_cpp
@@ -57,7 +62,6 @@ INCLUDE_MAIN_DIR = $(INCLUDE_DIR)/$(TOP_DIR_NAME)
 INCLUDE_HRPUTIL_DIR = $(INCLUDE_DIR)/hrpUtil
 INCLUDE_HRPCOLLISION_DIR = $(INCLUDE_DIR)/hrpCollision
 INCLUDE_HRPMODEL_DIR = $(INCLUDE_DIR)/hrpModel
-# INCLUDE_PLOG_DIR = ./include/submodules/plog/include
 INCLUDE_USRLOCAL_DIR = /usr/local/include
 INCLUDES = $(INCLUDE_DIR)
 INCLUDES += $(INCLUDE_MAIN_DIR)
@@ -65,7 +69,6 @@ INCLUDES += $(INCLUDE_HRPUTIL_DIR)
 INCLUDES += $(INCLUDE_HRPCOLLISION_DIR)
 INCLUDES += $(INCLUDE_HRPCOLLISION_DIR)/Opcode
 INCLUDES += $(INCLUDE_HRPMODEL_DIR)
-# INCLUDES += $(INCLUDE_PLOG_DIR)
 INCLUDES += $(INCLUDE_USRLOCAL_DIR)
 #
 # OS dependency

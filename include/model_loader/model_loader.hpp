@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2008, kdaic AIST, the University of Tokyo and General Robotix Inc.
+ * Copyright (c) 2019, kdaic
+ * Original source:
+ *   https://github.com/fkanehiro/openhrp3/tree/3.1.9/server/ModelLoader/ModelLoader_impl.h
+ * Copyright (c) 2008, AIST, the University of Tokyo and General Robotix Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html

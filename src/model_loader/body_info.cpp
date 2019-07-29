@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2019, kdaic
+ * Original source is
+ *   https://github.com/fkanehiro/openhrp3/tree/3.1.9/server/ModelLoader/BodyInfo_impl.cpp
+ * Copyright (c) 2008, AIST, the University of Tokyo and General Robotix Inc.
+ * All rights reserved. This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v10.html
+ * Contributors:
+ * National Institute of Advanced Industrial Science and Technology (AIST)
+ */
+
+/*!
+  @author Shin'ichiro Nakaoka
+  @author kdaic
+*/
+
 #include "body_info.hpp"
 
 #include <map>
@@ -9,7 +26,6 @@
 #include <hrpUtil/EasyScanner.h>
 #include <hrpUtil/VrmlNodes.h>
 #include <hrpUtil/VrmlParser.h>
-// #include <hrpUtil/ImageConverter.h>
 
 
 using namespace std;
@@ -265,7 +281,6 @@ int BodyInfo::readJointNodeSet(JointNodeSetPtr jointNodeSet, int& currentIndex, 
     int childIndex = readJointNodeSet(childJointNodeSet, currentIndex, index);
 
     // long childIndicesLength = linkInfo.childIndices.size();
-    // linkInfo.childIndices.clear();
     // linkInfo.childIndices.resize( childIndicesLength + 1 );
     // linkInfo.childIndices[childIndicesLength] = childIndex;
     linkInfo.childIndices.push_back(childIndex);

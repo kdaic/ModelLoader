@@ -1,3 +1,7 @@
+# destination
+lib/*
+bin/*
+
 # emacs backup
 .*~
 
