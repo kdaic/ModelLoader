@@ -14,7 +14,8 @@ Original source is **openHRP3**.
 
 ## 1.1. OS
 
-Ubuntu 18.04
+Linux
+(kernel version >= 4.18.0-24-generic)
 
 ## 1.2. Compiler
 
@@ -154,10 +155,9 @@ source files are not necessary, just only include files are needed.
 
 # 7. License
 
-Copyright (c) 2019, kdaic.  
-All rights reserved. This program is made available under the terms of the
-Eclipse Public License v1.0 which accompanies this distribution, and is
-available at http://www.eclipse.org/legal/epl-v10.html
+Copyright (c) 2019, kdaic.
+
+Software and license text is available at the top of each file.
 
 &nbsp;
 
