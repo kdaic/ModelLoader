@@ -3,56 +3,65 @@ model\_loader library
 
 Just Model Loader library in the hrplib of OpenHRP3.1 -- Not depended on CORBA, omniORB library.
 
-# Dependency
+# Original
 
-## OS
-
-Ubuntu 18.04
-
-## g++
-
-version >= 7.4.0
-
-## c++
-
-version >= c++11
 
 &nbsp;
 
-# Requirements
+# 1. Dependency
 
-## LAPACK & BLAS
+## 1.1. OS
+
+Ubuntu 18.04
+
+## 1.2. Compiler
+
+g++ version >= 7.4.0
+
+## 1.2. Language
+
+c++ version >= c++11
+
+&nbsp;
+
+# 2. Requirements
+
+## 2.1. LAPACK & BLAS
+
+Not needed?
 
 ```
 $ sudo apt-get install liblapack-dev libblas-dev
 ```
 
-## Eigen3
+## 2.2. Eigen3
 
 ```
 $ sudo apt-get install libeigen3-dev
 ```
 
-## Boost
+## 2.3. Boost
 
 ```
 $ sudo apt-get install libboost-all-dev
 ```
 
 check apt-get pakcage libboost-dev version.
+version >= 1.65 in my environment.
 
 ```
 dpkg -s libboost-dev
 ```
 
 
-## libjpeg, libpng
+## 2.4. libjpeg, libpng
+
 
 ```
 $ sudo apt-get install libjpeg-dev libpng-dev
 ```
 
-## Google test
+## 2.5. Google test
 
 clone from https://github.com/google/googletest.git  
 and compile & install.  
@@ -62,7 +71,7 @@ and compile & install.
 
 &nbsp;
 
-# Compile
+# 3. Compile
 
 Make at the top of directory.
 
@@ -72,40 +81,40 @@ $ make
 
 &nbsp;
 
-# Destination
+# 4. Destination
 
-## static library of ModelLoader 
+## 4.1. static library of ModelLoader 
 
 generated in the lib/, using HRP library 
 
-- libmodel_loader.a
+- **libmodel_loader.a**
 
 
-## App binary
+## 4.2. App binary
 
 generated in the bin/
 
-- model\_loader : from src/main.cpp
-- unit\_test : from the sources test/*.cpp in the test/
+- **model\_loader** : from src/main.cpp
+- **unit\_test** : from the sources test/*.cpp in the test/
 
 &nbsp;
 
-# Make Clean
+# 5. Make Clean
 
-Clean option removes object files(*.o).
+"clean" option is removing object files(*.o).
 
 ```
 $ make clean
 ```
 
-The CleanAll option removes not only \*.o but also lib/libmodel_loader.a and binaries(bin/*).
+the "clanall" option removes not only \*.o but also lib/libmodel_loader.a and binaries(bin/*).
 
 ```
 $ make cleanall
 ```
 
 
-# Directory Map
+# 6. Directory Map
 
 Include direcotry is separated from the source (the originals are one-package),
 Because it is useful & portable when libraries are used for another project.
