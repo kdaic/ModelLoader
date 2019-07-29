@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2019, kdaic
+ * Original source:
+ *   https://github.com/fkanehiro/openhrp3/blob/3.1.9/hrplib/hrpModel/ModelLoaderUtil.cpp
  * Copyright (c) 2008, AIST, the University of Tokyo and General Robotix Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
@@ -10,6 +13,7 @@
 /**
    @author Shin'ichiro Nakaoka
    @author Ergovision
+   @author kdaic
 */
 
 #include <stack>
@@ -228,13 +232,8 @@ Link* ModelLoaderHelper::createLink(int& index, const Matrix33& parentRs)
 
   //##### [Changed] Link Structure (convert NaryTree to BinaryTree).
   int childNum = linkInfo.childIndices.size();
-  // std::cout << "childNum : " << childNum << std::endl;
   for(int i=0;  i < childNum; i++ ) {
     int childIndex = linkInfo.childIndices[i];
-    // std::cout << ", childIndex :  "<< childIndex << std::endl;
-    if(childIndex==0) {
-      continue;
-    }
     Link* childLink = createLink(childIndex, Rs);
     if(childLink) {
       children.push(childLink);

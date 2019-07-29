@@ -1,3 +1,18 @@
+/*
+* Copyright (c) 2019, kdaic
+ * Original source:
+ *   https://github.com/fkanehiro/openhrp3/blob/3.1.9/idl/OpenHRP/ModelLoader.idl
+ * Copyright (c) 2008, AIST, the University of Tokyo and General Robotix Inc.
+ * All rights reserved. This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+/*!
+  @author Shin'ichiro Nakaoka
+  @author kdaic
+*/
+
 #ifndef MODEL_INFO_HPP_INCLUDE
 #define MODEL_INFO_HPP_INCLUDE
 

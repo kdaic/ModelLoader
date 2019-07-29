@@ -5,6 +5,7 @@ Just Model Loader library in the hrplib of OpenHRP3.1 -- Not depended on CORBA, 
 
 # Original
 
+[openHRP3.1](https://github.com/fkanehiro/openhrp3.git)
 
 &nbsp;
 
@@ -18,7 +19,7 @@ Ubuntu 18.04
 
 g++ version >= 7.4.0
 
-## 1.2. Language
+## 1.3. Language
 
 c++ version >= c++11
 
@@ -148,19 +149,17 @@ source files are not necessary, just only include files are needed.
     └── model
 
 ```
+&nbsp;
 
-<!-- ## tvmet -->
+# License
 
-<!-- [Download & Install page](http://tvmet.sourceforge.net/build.html) -->
+Copyright (c) 2008, kdaic.
+All rights reserved. This program is made available under the terms of the
+Eclipse Public License v1.0 which accompanies this distribution, and is
+available at http://www.eclipse.org/legal/epl-v10.html
 
-<!-- ``` -->
-<!-- $ tar -xjvf tvmet-X.X.X.tar.bz2 -->
-<!-- $ cd tvmet-X.X.X/ -->
-<!-- $ ./configure -->
-<!-- $ make -->
-<!-- $ sudo make install -->
-<!-- ``` -->
+&nbsp;
 
-
+<div align="right"> regards, <br> kdaic </div>
 
 
