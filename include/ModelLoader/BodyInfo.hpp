@@ -22,7 +22,7 @@
 #include <hrpModel/ModelNodeSet.h>
 #include <hrpCollision/ColdetModel.h>
 
-#include "shape_set_info.hpp"
+#include "ShapeSetInfo.hpp"
 
 #include "VrmlUtil.hpp"
 

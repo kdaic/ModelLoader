@@ -18,7 +18,7 @@
 #ifndef MODEL_LOADER_HPP_INCLUDE
 #define MODEL_LOADER_HPP_INCLUDE
 
-#include "body_info.hpp"
+#include "BodyInfo.hpp"
 #include <hrpUtil/ImageConverter.h>
 #include <hrpUtil/VrmlParser.h>
 #include <sys/stat.h>

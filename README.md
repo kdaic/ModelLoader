@@ -1,4 +1,4 @@
-model\_loader library
+ModelLoader library
 ===
 
 Just Model Loader library in the hrplib of OpenHRP3.1 -- Not depended on CORBA, omniORB library.
@@ -88,16 +88,16 @@ $ make
 
 ## 4.1. Static library of ModelLoader
 
-generated in the lib/, using HRP library 
+generated in the lib/ for using HRP library
 
-- **libmodel_loader.a**
+- **libModelLoader.a**
 
 
 ## 4.2. App binary
 
 generated in the bin/
 
-- **model\_loader** : from src/main.cpp
+- **ModelLoader** : from src/main.cpp
 - **unit\_test** : from the sources test/*.cpp with google test.
 
 &nbsp;
@@ -136,7 +136,7 @@ source files are not necessary, just only include files are needed.
 │   │   ├── Jpeg-6b
 │   │   ├── lpng1232
 │   │   └── zlib123
-│   └── model_loader : derive from original oprnhrp3/server/ModelLoader
+│   └── ModelLoader : derive from original oprnhrp3/server/ModelLoader
 ├── src
 │   ├── hrpCollision
 │   │   └── Opcode
@@ -146,7 +146,7 @@ source files are not necessary, just only include files are needed.
 │   │   ├── Jpeg-6b
 │   │   ├── lpng1232
 │   │   └── zlib123
-│   └── model_loader
+│   └── ModelLoader
 └── test
     └── model
 
