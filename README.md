@@ -57,13 +57,6 @@ dpkg -s libboost-dev
 ```
 
 
-## 2.4. libjpeg, libpng
-
-
-```
-$ sudo apt-get install libjpeg-dev libpng-dev
-```
-
 ## 2.5. Google test
 
 clone from https://github.com/google/googletest.git  
