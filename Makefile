@@ -77,7 +77,6 @@ else ifeq ($(OS),QNX)
 	INCLUDES += /usr/pkg/include
 endif
 INCLUDES += /usr/local/include
-
 #
 # INCLUDES_PATH(add prefix -I)
 INCLUDES_PATH = $(addprefix -I, $(INCLUDES))
@@ -85,17 +84,25 @@ INCLUDES_PATH = $(addprefix -I, $(INCLUDES))
 ##################################################################################
 # library directoxry
 LINK_DIRS =  -L. -L$(LIB_DIR) -L/usr/lib
+#
+# OS dependency
 ifeq ($(OS),QNX)
 	LINK_DIRS += -L/usr/pkg/lib
 endif
+#
 LINK_DIRS += -L/usr/local/lib
-
 #
 # link (pay attension to linking-order)
 LINK_GTEST = -lgtest_main -lgtest
 LINK_JPEG = $(LIB_DIR)/libjpeg.a
 LINK_PNG =  $(LIB_DIR)/libpng.a
-LINK_LAPACK = -latlas -llapack -lf2c -lblas -lcblas
+LINK_LAPACK = -llapack -lf2c -lblas
+#
+# OS dependency
+ifeq ($(OS),QNX)
+	LINK_LAPACK += -latlas -lcblas
+endif
+#
 # boost
 LINK_BOOST_COMPONETS = filesystem signals system regex program_options
 LINK_BOOST = $(addprefix -lboost_, $(LINK_BOOST_COMPONETS))
