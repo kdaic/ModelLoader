@@ -95,7 +95,8 @@ LINK_DIRS += -L/usr/local/lib
 # link (pay attension to linking-order)
 LINK_GTEST = -lgtest_main -lgtest
 LINK_JPEG = $(LIB_DIR)/libjpeg.a
-LINK_PNG =  $(LIB_DIR)/libpng.a
+LINK_PNG  = $(LIB_DIR)/libpng.a
+LINK_ZLIB = -lz
 LINK_LAPACK = -llapack -lf2c -lblas
 #
 # OS dependency
@@ -113,14 +114,13 @@ LINK += $(LINK_GTEST)
 #
 LINK += $(LINK_JPEG)
 LINK += $(LINK_PNG)
+LINK += $(LINK_ZLIB)
 LINK += $(LINK_LAPACK)
 LINK += $(LINK_BOOST)
 #
 # OS dependency
 ifeq ($(OS),Linux)
 	LINK += -lpthread -ldl
-else ifeq ($(OS),QNX)
-	LINK += -lz
 endif
 #
 #

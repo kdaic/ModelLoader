@@ -10,8 +10,6 @@
 #include "config.h"
 
 #include "VrmlNodes.h"
-#include <stdio.h>
-#include <jpeglib.h>
 
 using namespace std;
 
