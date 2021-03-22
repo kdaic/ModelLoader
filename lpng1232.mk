@@ -17,7 +17,7 @@ UNAME := $(shell uname)
 ifeq ($(OS),Linux)
 	CXX:=gcc
 else ifeq ($(OS),QNX)
-  CXX:=QCC
+  CXX:=qcc
 else
   $(error unknown OS $(OS))
 endif

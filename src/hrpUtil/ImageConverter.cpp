@@ -9,16 +9,12 @@
 #include <iostream>
 #include <stdio.h>
 
-#ifndef __QNX__
 extern "C" {
-#endif /* ifndef __QNX__ */
 
 #define XMD_H
 #include <jpeglib.h>
 
-#ifndef __QNX__
 }
-#endif /* ifndef __QNX__ */
 
 #include <png.h>
 
