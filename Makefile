@@ -37,15 +37,11 @@ BIN_DIR = ./bin
 SRC_DIR = ./src
 SRC_APP_DIR = $(SRC_DIR)/$(APP_NAME)
 SRC_HRPUTIL_DIR = $(SRC_DIR)/hrpUtil
-SRC_HRPUTIL_SUBDIR =  $(SRC_HRPUTIL_DIR)/Jpeg-6d
-SRC_HRPUTIL_SUBDIR += $(SRC_HRPUTIL_DIR)/lpng1232
-SRC_HRPUTIL_SUBDIR += $(SRC_HRPUTIL_DIR)/zlib123
 SRC_HRPCOLLISION_DIR = $(SRC_DIR)/hrpCollision
 SRC_HRPCOLLISION_SUBDIR = $(SRC_HRPCOLLISION_DIR)/Opcode/Ice
 SRC_HRPCOLLISION_SUBDIR += $(SRC_HRPCOLLISION_DIR)/Opcode
 SRC_HRPMODEL_DIR = $(SRC_DIR)/hrpModel
 SRC_HRP_DIR =   $(SRC_HRPUTIL_DIR)
-SRC_HRP_DIR +=  $(SRC_HRPUTIL_SIBDIR)
 SRC_HRP_DIR +=  $(SRC_HRPCOLLISION_DIR)
 SRC_HRP_DIR +=  $(SRC_HRPCOLLISION_SUBDIR)
 SRC_HRP_DIR +=  $(SRC_HRPMODEL_DIR)
@@ -60,16 +56,18 @@ TEST_SRC_UTIL_DIR = $(TEST_SRC_DIR)/util
 INCLUDE_DIR = ./include
 INCLUDE_MAIN_DIR = $(INCLUDE_DIR)/$(TOP_DIR_NAME)
 INCLUDE_HRPUTIL_DIR = $(INCLUDE_DIR)/hrpUtil
+INCLUDE_HRPUTIL_SUBDIR =  $(INCLUDE_HRPUTIL_DIR)/Jpeg-6b
+INCLUDE_HRPUTIL_SUBDIR += $(INCLUDE_HRPUTIL_DIR)/lpng1232
+INCLUDE_HRPUTIL_SUBDIR += $(INCLUDE_HRPUTIL_DIR)/zlib123
 INCLUDE_HRPCOLLISION_DIR = $(INCLUDE_DIR)/hrpCollision
 INCLUDE_HRPMODEL_DIR = $(INCLUDE_DIR)/hrpModel
-INCLUDE_USRLOCAL_DIR = /usr/local/include
 INCLUDES = $(INCLUDE_DIR)
 INCLUDES += $(INCLUDE_MAIN_DIR)
 INCLUDES += $(INCLUDE_HRPUTIL_DIR)
+INCLUDES += $(INCLUDE_HRPUTIL_SUBDIR)
 INCLUDES += $(INCLUDE_HRPCOLLISION_DIR)
 INCLUDES += $(INCLUDE_HRPCOLLISION_DIR)/Opcode
 INCLUDES += $(INCLUDE_HRPMODEL_DIR)
-INCLUDES += $(INCLUDE_USRLOCAL_DIR)
 #
 # OS dependency
 ifeq ($(OS),Linux)
@@ -78,22 +76,35 @@ ifeq ($(OS),Linux)
 else ifeq ($(OS),QNX)
 	INCLUDES += /usr/pkg/include
 endif
+INCLUDES += /usr/local/include
 #
 # INCLUDES_PATH(add prefix -I)
 INCLUDES_PATH = $(addprefix -I, $(INCLUDES))
 
 ##################################################################################
 # library directoxry
-LINK_USR_LOCAL_DIR = -L/usr/local/lib
+LINK_DIRS =  -L. -L$(LIB_DIR) -L/usr/lib
 #
-LINK_DIRS = -L. -L/usr/lib
-LINK_DIRS += $(LINK_USR_LOCAL_DIR)
+# OS dependency
+ifeq ($(OS),QNX)
+	LINK_DIRS += -L/usr/pkg/lib
+endif
+#
+LINK_DIRS += -L/usr/local/lib
 #
 # link (pay attension to linking-order)
 LINK_GTEST = -lgtest_main -lgtest
-LINK_JPEG = -ljpeg
-LINK_PNG = -lpng
-LINK_LAPACK = -llapack -lblas
+LINK_JPEG = $(LIB_DIR)/libjpeg.a
+LINK_PNG  = $(LIB_DIR)/libpng.a
+LINK_ZLIB = -lz
+LINK_LAPACK = -llapack -lf2c -lblas
+#
+# OS dependency
+ifeq ($(OS),QNX)
+	LINK_LAPACK += -latlas -lcblas
+endif
+#
+# boost
 LINK_BOOST_COMPONETS = filesystem signals system regex program_options
 LINK_BOOST = $(addprefix -lboost_, $(LINK_BOOST_COMPONETS))
 #
@@ -101,15 +112,16 @@ LINK = $(LINK_DIRS)
 LINK += -lm
 LINK += $(LINK_GTEST)
 #
-# OS dependency
-ifeq ($(OS),Linux)
-  LINK +=-lpthread -ldl
-endif
-#
 LINK += $(LINK_JPEG)
 LINK += $(LINK_PNG)
+LINK += $(LINK_ZLIB)
 LINK += $(LINK_LAPACK)
 LINK += $(LINK_BOOST)
+#
+# OS dependency
+ifeq ($(OS),Linux)
+	LINK += -lpthread -ldl
+endif
 #
 #
 ##################################################################################
@@ -150,16 +162,15 @@ compile_title:
 
 
 # separate compile -- make staic library
-$(SLIB_APP): $(LIB_OBJS)
+$(SLIB_APP): $(LIB_OBJS) $(LINK_JPEG) $(LINK_PNG)
 	@echo "\n  "$^" --> "$@"\n"
 	@if [ ! -d $(LIB_DIR) ]; then \
 		mkdir -p $(LIB_DIR); \
 	fi
 	ar rcs $@ $^
 # @rm $(LIB_OBJS)
-
 # separate compile -- make shared library
-$(LIB_APP): $(LIB_OBJS)
+$(LIB_APP): $(LIB_OBJS) $(LINK_JPEG) $(LINK_PNG)
 	@echo "\n  "$^" --> "$@"\n"
 	@if [ ! -d $(LIB_DIR) ]; then \
 		mkdir -p $(LIB_DIR); \
@@ -197,6 +208,13 @@ $(TEST_APP): $(TEST_OBJS) $(SLIB_APP)
 		$(CXX) -c $(CFLAGS) $(INCLUDES_PATH) -o $@ $<; \
 	fi
 
+### other depended 3rd-library
+$(LINK_JPEG):
+	make -f Jpeg-6b.mk
+
+$(LINK_PNG):
+	make -f lpng1232.mk
+
 # make clean
 clean:
 	rm -f $(LIB_OBJS)
@@ -209,9 +227,13 @@ clean:
 	rm -f $(SRC_HRPUTIL_DIR)/*~
 	rm -f $(SRC_HRPCOLLISION_DIR)/*~
 	rm -f $(SRC_HRPMODEL_DIR)/*~
+	make -f Jpeg-6b.mk clean
+	make -f lpng1232.mk clean
 
 # make cleanall
 cleanall: clean
 	rm -f $(SLIB_APP)
 	rm -f $(EXE_APP)
 	rm -f $(TEST_APP)
+	make -f Jpeg-6b.mk cleanall
+	make -f lpng1232.mk cleanall

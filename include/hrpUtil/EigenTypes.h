@@ -4,6 +4,22 @@
 #ifdef random
 #undef random
 #endif
+
+#include "config.h"
+#ifdef __QNX__
+using std::expf;
+using std::logf;
+using std::log10f;
+using std::sqrtf;
+using std::powf;
+using std::sinf;
+using std::cosf;
+using std::tanf;
+using std::tanhf;
+using std::floorf;
+using std::ceilf;
+#endif /* QNX */
+
 #include <Eigen/Eigen>
 
 namespace hrp{

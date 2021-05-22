@@ -31,7 +31,8 @@ c++ version >= c++11
 
 ## 2.1. LAPACK & BLAS
 
-needless?
+needless?  
+On QNX, altas & cblas is prbably also needed.  
 
 ```
 $ sudo apt-get install liblapack-dev libblas-dev
@@ -56,15 +57,7 @@ version >= 1.65 is OK as far as I can see.
 dpkg -s libboost-dev
 ```
 
-
-## 2.4. libjpeg, libpng
-
-
-```
-$ sudo apt-get install libjpeg-dev libpng-dev
-```
-
-## 2.5. Google test
+## 2.4. Google test
 
 clone from https://github.com/google/googletest.git  
 and compile & install.  

@@ -7,11 +7,15 @@
 #include "ImageConverter.h"
 
 #include <iostream>
+#include <stdio.h>
 
 extern "C" {
+
 #define XMD_H
 #include <jpeglib.h>
+
 }
+
 #include <png.h>
 
 

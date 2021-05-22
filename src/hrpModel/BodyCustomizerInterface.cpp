@@ -262,9 +262,11 @@ int hrp::loadBodyCustomizers(BodyInterface* bodyInterface)
 #ifndef _WIN32
         Dl_info info;
         if(dladdr((void*)&hrp::findBodyCustomizer, &info)){
-            filesystem::path customizerPath =
-                filesystem::path(info.dli_fname).branch_path().branch_path() / OPENHRP_RELATIVE_SHARE_DIR / "customizer";
-            numLoaded += loadBodyCustomizers(customizerPath.string(), bodyInterface);
+            if(info.dli_fname != 0x0) {
+                filesystem::path customizerPath =
+                    filesystem::path(info.dli_fname).branch_path().branch_path() / OPENHRP_RELATIVE_SHARE_DIR / "customizer";
+                numLoaded += loadBodyCustomizers(customizerPath.string(), bodyInterface);
+            }
         }
 #else
         string customizerPath(OPENHRP_SHARE_DIR);
